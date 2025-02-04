@@ -19,15 +19,12 @@ Inspired by Matt Gallagher, our project will make heavy use of modules and acces
 The `ImmutableData` infra deploys to the following platforms:
 * iOS 17.0+
 * iPadOS 17.0+
-* Mac Catalyst 17.0+
 * macOS 14.0+
 * tvOS 17.0+
 * visionOS 1.0+
 * watchOS 10.0+
 
-The `ImmutableData` tutorial requires Xcode 16.0+ and macOS 14.5+.
-
-The `ImmutableData` tutorial was built and tested on Xcode 16.2 and macOS 15.2.
+Building the `ImmutableData` tutorial requires Xcode 16.0+ and macOS 14.5+.
 
 Please file a GitHub issue if you encounter any compatibility problems.
 

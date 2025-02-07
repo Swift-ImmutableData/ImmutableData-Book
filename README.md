@@ -10,8 +10,12 @@ Over the course of this project, we present what we think is a better way. Drawi
 
 At the core of the architecture is a unidirectional data flow:
 
+```mermaid
 flowchart LR
+    accTitle: Data Flow in the ImmutableData Framework
+    accDescr: Data flows from action to state, and from state to view, in one direction only.
     A[Action] --> B[State] --> C[View]
+```
 
 All data flows through the application following this basic pattern, and a strict separation of concerns is enforced. The actions *declare* what has occurred, whether user input, a server response, or a change in a device's sensors, but they have no knowledge of the state or view layers. The state layer *reacts* to the "news" described by the action and updates the state accordingly. All mutation logic is contained within the state layer, but it knows nothing of the view layer. The views then *react* to the changes in the state layer as the new state flows through the component tree. Again, however, the view layer knows nothing about the state layer. By maintaining this strict unidirectional data flow and separation of concerns, our application code becomes easier to test, easier to reason about and explain to new team members, and easier to update when new features are required. 
 

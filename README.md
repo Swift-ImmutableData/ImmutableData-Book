@@ -17,9 +17,9 @@ flowchart LR
     A[Action] --> B[State] --> C[View]
 ```
 
-All data flows through the application following this basic pattern, and a strict separation of concerns is enforced. The actions *declare* what has occurred, whether user input, a server response, or a change in a device's sensors, but they have no knowledge of the state or view layers. The state layer *reacts* to the "news" described by the action and updates the state accordingly. All mutation logic is contained within the state layer, but it knows nothing of the view layer. The views then *react* to the changes in the state layer as the new state flows through the component tree. Again, however, the view layer knows nothing about the state layer. By maintaining this strict unidirectional data flow and separation of concerns, our application code becomes easier to test, easier to reason about and explain to new team members, and easier to update when new features are required. 
+All global state data flows through the application following this basic pattern, and a strict separation of concerns is enforced. The actions *declare* what has occurred, whether user input, a server response, or a change in a device’s sensors, but they have no knowledge of the state or view layers. The state layer *reacts* to the “news” described by the action and updates the state accordingly. All logic for making changes to the state is contained within the state layer, but it knows nothing of the view layer. The views then *react* to the changes in the state layer as the new state flows through the component tree. Again, however, the view layer knows nothing about the state layer. By maintaining this strict unidirectional data flow and separation of concerns, our application code becomes easier to test, easier to reason about, easier to explain to new team members, and easier to update when new features are required. 
 
-Further, avoiding complexity like two-way data bindings, or the spaghetti engendered by mutability, allows our code to become clean, fast and maintainable. This is the key difference between this application framework (and the ideas behind it) and other presentations of Actions, State and View previously shown at WWDC. By avoiding direct mutations called from outside the state layer and embracing immutability instead, complexity vanishes and our code becomes much more robust.
+Further, avoiding complexity like two-way data bindings, or the spaghetti engendered by mutability, allows our code to become clean, fast, and maintainable. This is the key difference between this application framework (and the ideas behind it) and other presentations of actions, state and view previously shown at WWDC.[^1] By avoiding direct mutations called from outside the state layer and embracing immutability instead, complexity vanishes and our code becomes much more robust.
 
 We call this framework and architecture `ImmutableData`. We present `ImmutableData` as a free and open-source project with free and open-source documentation. Over the course of this tutorial, we will show you, step-by-step, how the `ImmutableData` infra is built. Once the infra is ready, we will then build, step-by-step, multiple sample applications using SwiftUI to display and transform state through the `ImmutableData` architecture.
 
@@ -27,7 +27,7 @@ We call this framework and architecture `ImmutableData`. We present `ImmutableDa
 
 Our goal is to teach a new way of thinking about state management and data flow for SwiftUI. Our goal *is not* to teach Swift Programming or the basics of SwiftUI. You should have a strong competency in Swift 6.0 before beginning this tutorial. You should also have a working familiarity with SwiftUI. A working familiarity with SwiftData would be helpful, but is not required.
 
-Inspired by Matt Gallagher, our project will make heavy use of modules and access control to keep our code organized.[^1] A working familiarity with Swift Package Manager will be helpful, but our use of Swift Package APIs will be kept at a relatively basic level.
+Inspired by Matt Gallagher, our project will make heavy use of modules and access control to keep our code organized.[^2] A working familiarity with Swift Package Manager will be helpful, but our use of Swift Package APIs will be kept at a relatively basic level.
 
 The `ImmutableData` infra deploys to the following platforms:
 * iOS 17.0+
@@ -43,7 +43,7 @@ Please file a GitHub issue if you encounter any compatibility problems.
 
 ## Organization
 
-*The ImmutableData Programming Guide* is inspired by “long-form” documentation like [*Programming with Objective-C*][^2] and [*The Swift Programming Language*][^3].
+*The ImmutableData Programming Guide* is inspired by “long-form” documentation like [*Programming with Objective-C*][^3] and [*The Swift Programming Language*][^4].
 
 This guide includes the following chapters:
 
@@ -92,6 +92,7 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-[^1]: https://www.cocoawithlove.com/blog/app-submodules.html
-[^2]: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/
-[^3]: https://www.swift.org/documentation/tspl/
+[^1]: https://developer.apple.com/videos/play/wwdc2019/226
+[^2]: https://www.cocoawithlove.com/blog/app-submodules.html
+[^3]: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/
+[^4]: https://www.swift.org/documentation/tspl/

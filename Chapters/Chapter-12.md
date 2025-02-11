@@ -1,6 +1,6 @@
 # QuakesUI
 
-Before we build the component graph of our Quakes product, it might be helpful to rebuild the sample project from Apple. There are two main custom components for our product:
+Before we build the component tree of our Quakes product, it might be helpful to rebuild the sample project from Apple. There are two main custom components for our product:
 
 * `QuakeList`: A component to display our `Quake` values in a `SwiftUI.List`. We give users the ability to control how they want their values to be sorted. We also give users the ability to filter by name with a search bar.
 * `QuakeMap`: A component to display our `Quake` values in a `MapKit.Map`. These values should match the values displayed in `QuakeList`.
@@ -210,11 +210,11 @@ extension ImmutableUI.Selector {
 }
 ```
 
-These extensions are optional; we *could* build our component graph without them, but we would be passing the Store key path in all these different places by-hand. It would add extra work for our product engineers. Defining these extension also helps prevent product engineers from shipping a bug and accidentally passing an incorrect key path.
+These extensions are optional; we *could* build our component tree without them, but we would be passing the Store key path in all these different places by-hand. It would add extra work for our product engineers. Defining these extension also helps prevent product engineers from shipping a bug and accidentally passing an incorrect key path.
 
 ## Dispatch
 
-Let’s define a `Dispatch` type for our component graph to dispatch action values. Add a new Swift file under `Sources/QuakesUI`. Name this file `Dispatch.swift`.
+Let’s define a `Dispatch` type for our component tree to dispatch action values. Add a new Swift file under `Sources/QuakesUI`. Name this file `Dispatch.swift`.
 
 ```swift
 //  Dispatch.swift
@@ -237,7 +237,7 @@ import SwiftUI
 }
 ```
 
-Similar to our Animals product, we only expose the `dispatch` function for action values. We do not expose the `dispatch` function for thunk operations. There might be some use cases where dispatching thunk operations from our component graph might be helpful for testing or prototyping, but our opinion is this is an anti-pattern for your production applications: component graphs should dispatch action values, not thunk operations.
+Similar to our Animals product, we only expose the `dispatch` function for action values. We do not expose the `dispatch` function for thunk operations. There might be some use cases where dispatching thunk operations from our component tree might be helpful for testing or prototyping, but our opinion is this is an anti-pattern for your production applications: component trees should dispatch action values, not thunk operations.
 
 ## Select
 
@@ -302,7 +302,7 @@ extension ImmutableUI.Selector {
 
 These extensions are optional. If these extensions were not defined, product engineers would be responsible for defining their own `didChange` closures when every Selector is defined. There are some advanced use cases where this ability to configure and customize is helpful, but value equality is going to be a very good choice as a default for most products.
 
-We can now begin to define the Selectors of our component graph. These will map to the Selectors we defined from `AnimalsState`. Let’s begin with `SelectQuakes`. This will return a `Dictionary` of `Quake` values for displaying our `QuakeMap` component.
+We can now begin to define the Selectors of our component tree. These will map to the Selectors we defined from `AnimalsState`. Let’s begin with `SelectQuakes`. This will return a `Dictionary` of `Quake` values for displaying our `QuakeMap` component.
 
 ```swift
 //  Select.swift
@@ -534,7 +534,7 @@ extension View {
 
 Most of what we built this chapter looks very similar to our Animals product. Our selectors were specialized for our Quakes product domain, but the patterns and conventions we follow carried over from what we learned before.
 
-Our component graph will follow a similar strategy: common patterns and conventions with specialization for our product domain. Our Presenter Components are built just for our Quakes product, but our Container Components will look — and feel — similar to what we built for our Animals product.
+Our component tree will follow a similar strategy: common patterns and conventions with specialization for our product domain. Our Presenter Components are built just for our Quakes product, but our Container Components will look — and feel — similar to what we built for our Animals product.
 
 Let’s begin with `QuakeMap`. We construct a `MapKit.Map` to display `Quake` values.
 
@@ -708,7 +708,7 @@ extension QuakeMap: View {
 }
 ```
 
-Remember the role of our Container: we integrate with `ImmutableData` for fetching and selecting. Our Container is meant to be lightweight; we do the “heavy lifting” of defining our SwiftUI component graph in our Presenter.
+Remember the role of our Container: we integrate with `ImmutableData` for fetching and selecting. Our Container is meant to be lightweight; we do the “heavy lifting” of defining our SwiftUI component tree in our Presenter.
 
 Here is the declaration of our Container:
 
@@ -1648,7 +1648,7 @@ QuakesUI
         └── StoreKey.swift
 ```
 
-Our Quakes product has some big differences compared to our Animals product. Our Animals product used a local database for reading and writing data. Our Quakes product uses a remote server for reading data and a local database for writing data. The good news is that our component graph does not need to know about this: `ImmutableData` is an abstraction-layer. From the component graph, both products interact with `ImmutableData` in similar ways: we select data with Selectors and we dispatch actions on user events.
+Our Quakes product has some big differences compared to our Animals product. Our Animals product used a local database for reading and writing data. Our Quakes product uses a remote server for reading data and a local database for writing data. The good news is that our component tree does not need to know about this: `ImmutableData` is an abstraction-layer. From the component tree, both products interact with `ImmutableData` in similar ways: we select data with Selectors and we dispatch actions on user events.
 
 [^1]: https://developer.apple.com/documentation/mapkit/mapkit_for_swiftui
 [^2]: https://developer.apple.com/forums/thread/771084

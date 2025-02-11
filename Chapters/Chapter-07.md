@@ -2,7 +2,7 @@
 
 When building products with dependencies on complex services like SwiftData, it can be very handy to be able to run things “end-to-end” outside our UI. We can think of this as an “integration test”; this is in addition to — not a replacement for — conventional unit tests.
 
-Before we build our component graph and put these data models on-screen, let’s build a simple command-line executable against our `LocalStore`. Our `AnimalsDataClient` executable will build against our production `LocalStore` class and persist its data on our filesystem. This means we can run our `AnimalsDataClient` executable, mutate our data, and see that new data the next time we run.
+Before we build our component tree and put these data models on-screen, let’s build a simple command-line executable against our `LocalStore`. Our `AnimalsDataClient` executable will build against our production `LocalStore` class and persist its data on our filesystem. This means we can run our `AnimalsDataClient` executable, mutate our data, and see that new data the next time we run.
 
 To run against SwiftData from a command-line executable, we need a little work to configure our module.[^1] The Workspace from the [`ImmutableData-Samples`](https://github.com/Swift-ImmutableData/ImmutableData-Samples) repo already includes this configuration to save us some time. All we have to do is select the `AnimalsData` package and open `Sources/AnimalsDataClient/main.swift`.
 

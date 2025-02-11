@@ -54,19 +54,19 @@ This guide includes the following chapters:
 * [Chapter 02](Chapters/Chapter-02.md): We build the `ImmutableUI` module for making our global state available to SwiftUI view components.
 ### Part 2: Products
 * [Chapter 03](Chapters/Chapter-03.md): We build the data models of our Counter application: a simple SwiftUI app to increment and decrement an integer.
-* [Chapter 04](Chapters/Chapter-04.md): We build the component graph of our Counter application.
+* [Chapter 04](Chapters/Chapter-04.md): We build the component tree of our Counter application.
 * [Chapter 05](Chapters/Chapter-05.md): We build and run our Counter application.
 * [Chapter 06](Chapters/Chapter-06.md): We build the data models of our Animals application: a SwiftUI app to store a collection of data models with persistence to a local database.
-* [Chapter 07](Chapters/Chapter-07.md): We build a command-line utility for testing the data models of our Animals application without any component graph.
-* [Chapter 08](Chapters/Chapter-08.md): We build the component graph of our Animals application.
+* [Chapter 07](Chapters/Chapter-07.md): We build a command-line utility for testing the data models of our Animals application without any component tree.
+* [Chapter 08](Chapters/Chapter-08.md): We build the component tree of our Animals application.
 * [Chapter 09](Chapters/Chapter-09.md): We build and run our Animals application.
 * [Chapter 10](Chapters/Chapter-10.md): We build the data models of our Quakes application: a SwiftUI app to fetch a collection of data models from a remote server with persistence to a local database.
-* [Chapter 11](Chapters/Chapter-11.md): We build a command-line utility for testing the data models of our Quakes application without any component graph.
-* [Chapter 12](Chapters/Chapter-12.md): We build the component graph of our Quakes application.
+* [Chapter 11](Chapters/Chapter-11.md): We build a command-line utility for testing the data models of our Quakes application without any component tree.
+* [Chapter 12](Chapters/Chapter-12.md): We build the component tree of our Quakes application.
 * [Chapter 13](Chapters/Chapter-13.md): We build and run our Quakes application.
 * [Chapter 14](Chapters/Chapter-14.md): We update the data models of our Animals application to support persistence to a remote server.
 * [Chapter 15](Chapters/Chapter-15.md): We build an HTTP server for testing our new Animals application.
-* [Chapter 16](Chapters/Chapter-16.md): We build a command-line utility for testing the data models of our new Animals application without any component graph.
+* [Chapter 16](Chapters/Chapter-16.md): We build a command-line utility for testing the data models of our new Animals application without any component tree.
 * [Chapter 17](Chapters/Chapter-17.md): We build and run our new Animals application.
 ### Part 3: Performance
 * [Chapter 18](Chapters/Chapter-18.md): We learn about specialized data structures that can improve the performance of our applications when working with large amounts of data that is copied many times.

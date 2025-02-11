@@ -36,7 +36,7 @@ Once you clone the `ImmutableData-Samples` repo locally, you have the option to 
 
 The `Store` class will save the current state of our data models. Our `Store` class is a long-lived object. You might think of a `Store` as behaving similar in some ways to a `ModelContext` from SwiftData. Unlike `ModelContext`, we expect applications to build just one `Store` instance for every app lifecycle, but you can create multiple instances when testing.
 
-Our `Store` instance will be our “source of truth” for all global state in our application. This does *not* mean our `Store` instance will need to be the source of truth for ephemeral, local, or component state. Building our sample applications will give us practice choosing what state belongs in `Store` and what state can be saved directly in our SwiftUI component graph.
+Our `Store` instance will be our “source of truth” for all global state in our application. This does *not* mean our `Store` instance will need to be the source of truth for ephemeral, local, or component state. Building our sample applications will give us practice choosing what state belongs in `Store` and what state can be saved directly in our SwiftUI component tree.
 
 Before we write some code, let’s learn a little more about some of the basic types that we use to model and transform our global state over time. Our `ImmutableData` architecture is inspired by Flux and Redux. While we do not assume any prior experience with Flux and Redux before beginning this tutorial, you might want to familiarize yourself with the basic ideas behind these architectures before we build `ImmutableData`. We recommend [*The Case for Flux*][^6] by Dan Abramov and [*A Cartoon Intro to Redux*][^7] by Lin Clark to learn more.
 
@@ -46,13 +46,14 @@ Our `Store` class is responsible for saving a State value: this is the source of
 
 ```mermaid
 flowchart LR
-  State --> Component
-  Component --> View
+  accTitle: Data Flow in SwiftUI Part One
+  accDescr: Our view is a function of state.
+  State --> View
 ```
 
 In SwiftUI, our View can be thought of as a function of State. Our components define a `body` property to construct a declarative description of our UI at this moment in time. It is the responsibility of the infra engineer building SwiftUI to map those declarative descriptions to View objects. When our State updates, our component recomputes our `body` property.
 
-For this chapter, our State value is where we keep global state. We continue to keep local state saved directly in our component graph. Suppose we were building an application similar to the Contacts application on macOS. A `Person` data model might represent one person in our application. A customer opening our application would expect changes to their saved contacts to persist across app launches. A customer would also expect that opening their saved contacts in multiple windows would display the same contacts. This implies that our `Person` data models are what we call global state. While our customer opens their saved contacts in multiple windows, our customer has the ability to display the same contacts in different ways. One window may sort contacts by first name, another window may sort contacts by last name, and another window may filter contact names with a matching substring. These are examples of local state. This state will be saved in our SwiftUI component graph using the conventional patterns (like `SwiftUI.State` and `SwiftUI.Binding`) you are already familiar with.
+For this chapter, our State value is where we keep global state. We continue to keep local state saved directly in our component tree. Suppose we were building an application similar to the Contacts application on macOS. A `Person` data model might represent one person in our application. A customer opening our application would expect changes to their saved contacts to persist across app launches. A customer would also expect that opening their saved contacts in multiple windows would display the same contacts. This implies that our `Person` data models are what we call global state. While our customer opens their saved contacts in multiple windows, our customer has the ability to display the same contacts in different ways. One window may sort contacts by first name, another window may sort contacts by last name, and another window may filter contact names with a matching substring. These are examples of local state. This state will be saved in our SwiftUI component tree using the conventional patterns (like `SwiftUI.State` and `SwiftUI.Binding`) you are already familiar with.
 
 When we build our sample application products, we will see how we build different State types which are customized for specific product domains. For now, our goal is to build an infra generalized across *any* State type; we build infra in a way that can be shared across multiple products.
 
@@ -60,12 +61,14 @@ Our State serves a similar role as the State type in Redux.[^8]
 
 ### Action
 
-In a SwiftUI application using SwiftData, our data models were objects that could be mutated directly from our component graph using imperative logic. Let’s try and “think declaratively” and rebuild our mental model for mapping important events to transformations on our source of truth.
+In a SwiftUI application using SwiftData, our data models were objects that could be mutated directly from our component tree using imperative logic. Let’s try and “think declaratively” and rebuild our mental model for mapping important events to transformations on our source of truth.
 
-Using SwiftData, you might build a Contacts application that displays a detail component for one person. This detail component might have the ability to add or edit information on one person. You might have the ability to add or edit an email address, a phone number, or a name. These user events are then mapped at the component level to imperative instructions on the `Person` reference. Your “functional” and “declarative” programming model for building and updating this component graph with SwiftUI is then paired with a “object-oriented” and “imperative” programming model for building and updating your graph of data models with SwiftData.
+Using SwiftData, you might build a Contacts application that displays a detail component for one person. This detail component might have the ability to add or edit information on one person. You might have the ability to add or edit an email address, a phone number, or a name. These user events are then mapped at the component level to imperative instructions on the `Person` reference. Your “functional” and “declarative” programming model for building and updating this component tree with SwiftUI is then paired with a “object-oriented” and “imperative” programming model for building and updating your graph of data models with SwiftData.
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow in SwiftUI Part Two
+  accDescr: Data flows from action to state, and from state to view.
   Action --> State
   State --> View
   View --> Action
@@ -75,6 +78,8 @@ In applications built from SwiftUI, we want data to flow in one direction: this 
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow in SwiftUI Part Three
+  accDescr: Data flows from action to state causing a mutation, and from state to view causing an update.
   Action -- Mutation --> State
   State -- Updates --> View
   View --> Action
@@ -84,17 +89,19 @@ Let’s think through one important step: How exactly does an Action perform a m
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow in SwiftUI Part Four
+  accDescr: Data flows from view to state causing a mutation, and from state to view causing an update.
   State -- Updates --> View
   View -- Mutation --> State
 ```
 
-At this point, we are leveraging a functional and declarative programming model for building and updating our component graph, but we are leveraging an object-oriented and imperative programming model for building and updating our global state.
+At this point, we are leveraging a functional and declarative programming model for building and updating our component tree, but we are leveraging an object-oriented and imperative programming model for building and updating our global state.
 
-Our approach for building the `ImmutableData` architecture is inspired by Flux and Redux. Instead of our component graph mutating our global state with imperative logic, our component graph *declares* when user events happen. At the data layer of our products, these user events then become the imperative instructions that lead to a transformation of global state.
+Our approach for building the `ImmutableData` architecture is inspired by Flux and Redux. Instead of our component tree mutating our global state with imperative logic, our component tree *declares* when user events happen. At the data layer of our products, these user events then become the imperative instructions that lead to a transformation of global state.
 
 Our user events, such as a SwiftUI button component being tapped, are instances of Action types, but Action types are not limited to user events. Action types could represent system events like a location alert when moving your device, server events like an incoming push notification or web-socket message, or other events like timers.
 
-We model Action types as immutable data structures. Our Action types can contain context and payloads that carry information from the component graph. When thinking about Action types, try not to think about Action types as “replacements” for imperative mutations on state. An Action type declares an event that just took place; we map that event to a transformation on state using our next type.
+We model Action types as immutable data structures. Our Action types can contain context and payloads that carry information from the component tree. When thinking about Action types, try not to think about Action types as “replacements” for imperative mutations on state. An Action type declares an event that just took place; we map that event to a transformation on state using our next type.
 
 Similar to State, we build our infra generalized across any Action type; we will see concrete examples of what Action values look like when we build our sample application products.
 
@@ -108,6 +115,8 @@ Let’s think back to our mental model for Views: our View can be thought of as 
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow through Reducers
+  accDescr: Our reducer maps from a State and an Action to a new State.
   oldState[State] --> Reducer
   Action --> Reducer
   Reducer --> newState[State]
@@ -131,6 +140,8 @@ Our State and Action types are immutable value types. Our Reducer is a pure func
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow in ImmutableData
+  accDescr: Data flows from action to store. The store passes the action to a reducer along with the current state of our application. The reducer transforms the current state of our application to a new state. The new state updates the view. The view creates an action on a user event and the cycle continues.
   Action --> Reducer
   subgraph Store
   State --> Reducer
@@ -186,7 +197,7 @@ Here’s the first step to building our `Store`:
 
 Our `Store` is a class with two generic type parameters: `State` and `Action`. The only constraints we make on `State` and `Action` are both types must be `Sendable`. Our State and Action will always be immutable value types, but we lack an easy ability to formalize this constraint in Swift 6.0.
 
-Our UI component graph will select arbitrary slices of state to display from our `Store`. These operations will be synchronous and blocking. Isolating our `Store` to `MainActor` gives us an easy way to pass values to component `body` properties which are also isolated to `MainActor`.
+Our UI component tree will select arbitrary slices of state to display from our `Store`. These operations will be synchronous and blocking. Isolating our `Store` to `MainActor` gives us an easy way to pass values to component `body` properties which are also isolated to `MainActor`.
 
 Our `Store` initializer takes two parameters: a State and a Reducer. Our sample application products will use this initializer to customize their `Store` for their own domain. A contacts application would have a different `initialState` value than a photo library application. A photo library application would have a different Reducer than a contacts application. This `Store` class is flexible and composable; we can use the same implementation across all our sample application products without subclassing.
 
@@ -269,13 +280,13 @@ extension Store : Dispatcher {
 
 Our `thunk` closures accept two parameters: a `Dispatcher` and a `Selector`. Once we define a `thunk` closure, we can then select slices of state, dispatch actions, and even choose to dispatch new `thunk` closures.
 
-Giving our `Dispatcher` the ability to accept these `thunk` closures is a powerful alternative to dispatching Action values, but there is a philosophical shift in our thinking taking place that will limit how and where we use this ability. One of our goals in building the `ImmutableData` architecture is to think declaratively from our UI component graph. Our `thunk` closures are units of *imperative* logic. We will see places in our sample application products where we do want this ability, but it will not be from our UI component graph. Our UI component graph will continue to dispatch Action values. Instead of our UI component graph telling our data layer *how* to behave when an important event occurs, we continue to dispatch Action values to tell our data layer *when* an important event occurs and *what* that event was. Before we finish building our `Store`, we will explore how Listeners will work together with Thunks to factor imperative logic out of our UI component graph.
+Giving our `Dispatcher` the ability to accept these `thunk` closures is a powerful alternative to dispatching Action values, but there is a philosophical shift in our thinking taking place that will limit how and where we use this ability. One of our goals in building the `ImmutableData` architecture is to think declaratively from our UI component tree. Our `thunk` closures are units of *imperative* logic. We will see places in our sample application products where we do want this ability, but it will not be from our UI component tree. Our UI component tree will continue to dispatch Action values. Instead of our UI component tree telling our data layer *how* to behave when an important event occurs, we continue to dispatch Action values to tell our data layer *when* an important event occurs and *what* that event was. Before we finish building our `Store`, we will explore how Listeners will work together with Thunks to factor imperative logic out of our UI component tree.
 
 Our `dispatch(thunk:)` functions serve a similar role as the `Thunk` middleware in Redux.[^14]
 
 ## Selector
 
-Our `state` is still a private property. We have the ability to transform our State over time with our Reducer, but we also need a way for our UI component graph to select slices of state for displaying to the user. Let’s add this new function in a protocol. Add a new Swift file under `Sources/ImmutableData`. Name this file `Selector.swift`.
+Our `state` is still a private property. We have the ability to transform our State over time with our Reducer, but we also need a way for our UI component tree to select slices of state for displaying to the user. Let’s add this new function in a protocol. Add a new Swift file under `Sources/ImmutableData`. Name this file `Selector.swift`.
 
 Here is what our `Selector` protocol looks like:
 
@@ -289,7 +300,7 @@ public protocol Selector<State> : Sendable {
 }
 ```
 
-Our UI component graph displays data which it “selects” from the current state of our system. This data could be an arbitrary slice of state, such as all contacts with a name beginning with an arbitrary letter. It could be a *transformation* of a slice of state, such as all contacts sorted by name. Our `selector` closure will define what data is returned from our `Store`.
+Our UI component tree displays data which it “selects” from the current state of our system. This data could be an arbitrary slice of state, such as all contacts with a name beginning with an arbitrary letter. It could be a *transformation* of a slice of state, such as all contacts sorted by name. Our `selector` closure will define what data is returned from our `Store`.
 
 We can now switch back to `Store` and adopt this new protocol:
 
@@ -325,7 +336,7 @@ The final piece to our `Store` class will be the ability for product and infra e
 
 Our contacts application might launch and display an empty `List` component. To display `Person` instances in this `List`, we might need to perform a network fetch. While `thunk` closures do give us an ability for UI components to perform asynchronous work when an important event occurs, we want to think declaratively: we want to tell our data layer *what* just happened; not *how* it should transform State.
 
-Our solution will be for our UI component graph to continue dispatching Action values to our `Store`. Since we don’t give our Reducer the ability to perform asynchronous work or side effects, we build asynchronous work or side effects in a `Listener` class. Our `Listener` receives Action values as they are dispatched to the `Store`, then has the ability to perform asynchronous work or side effects by passing a `thunk` closure back to the `Store`.
+Our solution will be for our UI component tree to continue dispatching Action values to our `Store`. Since we don’t give our Reducer the ability to perform asynchronous work or side effects, we build asynchronous work or side effects in a `Listener` class. Our `Listener` receives Action values as they are dispatched to the `Store`, then has the ability to perform asynchronous work or side effects by passing a `thunk` closure back to the `Store`.
 
 We will see examples of `Listener` types when we build our sample application products. For now, let’s focus on the ability to stream our updates to an arbitrary `Listener`. Add a new Swift file under `Sources/ImmutableData`. Name this file `Streamer.swift`.
 

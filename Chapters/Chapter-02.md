@@ -4,15 +4,15 @@ Now that we have our `Store` class for saving the state of our system at a momen
 
 There are three types we focus our effort on for this chapter:
 
-* `Provider`: A SwiftUI view component for passing a `Store` instance through a view component graph.
+* `Provider`: A SwiftUI view component for passing a `Store` instance through a view component tree.
 * `Dispatcher`: A SwiftUI `DynamicProperty` for dispatching Action values from a SwiftUI view component.
 * `Selector`: A SwiftUI `DynamicProperty` for selecting a slice of State from a SwiftUI view component.
 
 ## Provider
 
-If you have experience with shipping SwiftData in a SwiftUI application, you might be familiar with the `modelContext` environment value.[^1] A typical SwiftUI application might initialize a `ModelContext` instance at app launch, and then make that `ModelContext` available through the view component graph with `SwiftUI.Environment`.
+If you have experience with shipping SwiftData in a SwiftUI application, you might be familiar with the `modelContext` environment value.[^1] A typical SwiftUI application might initialize a `ModelContext` instance at app launch, and then make that `ModelContext` available through the view component tree with `SwiftUI.Environment`.
 
-SwiftData supports creating multiple `ModelContext` instances over your app lifecycle. The Flux architecture supported multiple `Store` instances. We choose an approach consistent with the Redux architecture; we will create just one `Store` instance at app launch. We then make that `Store` available through the view component graph with `SwiftUI.Environment`.
+SwiftData supports creating multiple `ModelContext` instances over your app lifecycle. The Flux architecture supported multiple `Store` instances. We choose an approach consistent with the Redux architecture; we will create just one `Store` instance at app launch. We then make that `Store` available through the view component tree with `SwiftUI.Environment`.
 
 Select the `ImmutableUI` package and add a new Swift file under `Sources/ImmutableUI`. Name this file `Provider.swift`. This view component is not very complex; here is all we need:
 
@@ -49,7 +49,7 @@ Our initializer takes three parameters:
 * A `store` instance of a generic `Store` type.
 * A `content` closure to build a `Content` view component.
 
-All we have to do when computing our `body` is set the `environment` value for `keyPath` to our `store` on the `content` view component graph. This `store` will then be available to use across that view component graph similar to `modelContext`.
+All we have to do when computing our `body` is set the `environment` value for `keyPath` to our `store` on the `content` view component tree. This `store` will then be available to use across that view component tree similar to `modelContext`.
 
 Our `Provider` component serves a similar role as the `Provider` component in React Redux.[^2]
 
@@ -162,11 +162,11 @@ public struct OutputSelector<State, Output> {
 
 Our `DependencySelector` type is initialized with a `select` closure, which returns a `Dependency` from a State, and a `didChange` closure, which returns `true` when two `Dependency` values have changed. In practice, we expect most product engineers to choose for their `Dependency` type to use value inequality (`!=`) to indicate when two `Dependency` values have changed. Our approach gives this infra the flexibility to handle more advanced use cases where product engineers need specialized control over the value returned from `didChange`.
 
-Our `OutputSelector` type follows a similar pattern: a `select` closure, which returns an `Output` from a State, and a `didChange` closure, which returns `true` when two `Output` values have changed. Our `didChange` closure will be needed when we give our type the ability to use `Observable` for updating our view component graph.
+Our `OutputSelector` type follows a similar pattern: a `select` closure, which returns an `Output` from a State, and a `didChange` closure, which returns `true` when two `Output` values have changed. Our `didChange` closure will be needed when we give our type the ability to use `Observable` for updating our view component tree.
 
 Let’s turn our attention to `AsyncListener`. Add a new Swift file under `Sources/ImmutableUI`. Name this file `AsyncListener.swift`.
 
-Our `AsyncListener` will use `Observable` to keep our view component graph updated. For a quick review of `Observable`, please read [SE-0395][^6]. Let’s begin with a small class just for `Observable`:
+Our `AsyncListener` will use `Observable` to keep our view component tree updated. For a quick review of `Observable`, please read [SE-0395][^6]. Let’s begin with a small class just for `Observable`:
 
 ```swift
 //  AsyncListener.swift
@@ -344,7 +344,7 @@ extension AsyncListener {
 }
 ```
 
-We begin with an optional `print` statement that is available in debug builds. These statements can be very helpful during debugging so that product engineers can follow along to see how their view component graph is being updated as Action values are dispatched. We enable this with our `com.northbronson.ImmutableUI.Debug` flag passed to `UserDefaults`.
+We begin with an optional `print` statement that is available in debug builds. These statements can be very helpful during debugging so that product engineers can follow along to see how their view component tree is being updated as Action values are dispatched. We enable this with our `com.northbronson.ImmutableUI.Debug` flag passed to `UserDefaults`.
 
 We pass every `select` closure to our `store` and select the current set of `Dependency` values. If we have already cached a previous set of `Dependency` values, we compare the two and return `true` if they have changed. If this is our first time selecting a set of `Dependency` values, we return `true`.
 

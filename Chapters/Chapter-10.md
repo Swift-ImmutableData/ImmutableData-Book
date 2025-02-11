@@ -35,7 +35,7 @@ static func fetchFeatures() async throws -> GeoFeatureCollection {
 
 When we build and run our application again, we can fetch all earthquakes from the previous month. With all these earthquakes saved in SwiftData, our application feels slow. This sample application product works with SwiftData on its `main` thread. Loading earthquakes, filtering earthquakes, and deleting earthquakes now freezes the interface; the spinning wait cursor indicates our `main` thread is blocked.[^2]
 
-We clone the application with the `ImmutableData` architecture. Instead of delivering mutable model objects to our component graph, we deliver immutable model values. Instead of performing imperative mutations to transform global state from our component graph, we dispatch action values when user events happen. Once we abstract our SwiftData models out of our component graph, it will be very easy to perform all that expensive work on a background thread. When our component graph is no longer waiting on expensive operations from SwiftData, we can work with much larger amounts of data without blocking our interface.
+We clone the application with the `ImmutableData` architecture. Instead of delivering mutable model objects to our component tree, we deliver immutable model values. Instead of performing imperative mutations to transform global state from our component tree, we dispatch action values when user events happen. Once we abstract our SwiftData models out of our component tree, it will be very easy to perform all that expensive work on a background thread. When our component tree is no longer waiting on expensive operations from SwiftData, we can work with much larger amounts of data without blocking our interface.
 
 ## Quake
 
@@ -252,12 +252,12 @@ extension QuakesState {
 }
 ```
 
-We can now construct the selectors needed for our component graph. Let’s think through the data we need to display:
+We can now construct the selectors needed for our component tree. Let’s think through the data we need to display:
 
 * `SelectQuakesValues`: Our `QuakeList` component displays a subset of all the `Quake` value in our system: we filter for earthquakes occurring on a specific calendar day with a `name` property that contains the `String` value in our search bar. Our `QuakeList` component displays those earthquakes sorted by magnitude or time: we return an `Array` of sorted values.
 * `SelectQuakes`: Our `QuakeMap` component should display the same earthquakes as our `QuakeList`, but we don’t need to perform a sort operation on this data: our selector will return a `Dictionary` of `Quake` values without sorting operations.
 * `SelectQuakesCount`: Our `QuakeList` component displays the total count of all `Quake` values in our system.
-* `SelectQuakesStatus`: We return the `Status` of our most recent fetch to return `Quake` values. We use this in our component graph to defend against edge-casey behavior and disable certain user events when a fetch operation is taking place.
+* `SelectQuakesStatus`: We return the `Status` of our most recent fetch to return `Quake` values. We use this in our component tree to defend against edge-casey behavior and disable certain user events when a fetch operation is taking place.
 * `SelectQuake`: Selecting a `Quake` value from our `QuakeList` component should highlight that same `Quake` value. This selector will return a `Quake` value for a given `Quake.ID`.
 
 Let’s begin with an extension on `Quake` that we will use for filter operations:
@@ -449,9 +449,9 @@ extension QuakesState {
 
 Our `QuakesAction` values will look similar to our `AnimalsAction` values. Our application needs to perform asynchronous operations. Similar to our Animals product, our Quakes product will construct a `Listener` type to dispatch thunk operations and a `PersistentSession` type to dispatch action values after those operations have completed.
 
-We will define two “domains” of actions for our Quakes product: `UI` and `Data`. Similar to our Animals product, our `UI` domain will define action values that come from our component graph and our `Data` domain will define action values that come from our `PersistentSession`.
+We will define two “domains” of actions for our Quakes product: `UI` and `Data`. Similar to our Animals product, our `UI` domain will define action values that come from our component tree and our `Data` domain will define action values that come from our `PersistentSession`.
 
-Let’s try running the application from Apple again. Let’s start by documenting the actions we can dispatch from our component graph:
+Let’s try running the application from Apple again. Let’s start by documenting the actions we can dispatch from our component tree:
 
 * The `QuakeList` component displays a button to fetch the most recent earthquakes from USGS. In the sample project from Apple, this operation fetches the earthquakes from the current day. Let’s make this a little more interesting and add options to fetch earthquakes from the current hour, the current day, the current week, and the current month.
 * The `QuakeList` component displays a button to delete the selected `Quake` value from our local database. This has no effect on the data from USGS; this is just a local operation.
@@ -1582,7 +1582,7 @@ extension LocalStore {
 }
 ```
 
-This should look familiar to what we built for our Animals product. Our `LocalStore` operates on `QuakeModel` classes, but we return immutable `Quake` values to our component graph. Our component graph does not need to know about `QuakeModel`: this is an implementation detail.
+This should look familiar to what we built for our Animals product. Our `LocalStore` operates on `QuakeModel` classes, but we return immutable `Quake` values to our component tree. Our component tree does not need to know about `QuakeModel`: this is an implementation detail.
 
 Here is our mutation for updating our local database with `Quake` values from our remote server:
 

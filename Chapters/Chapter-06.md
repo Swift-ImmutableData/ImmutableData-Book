@@ -209,13 +209,13 @@ public enum Status: Hashable, Sendable {
 }
 ```
 
-Consistent with a convention from Redux JS, we adopt an `enum` instead of an `isLoading` boolean value.[^2] This gives us more flexibility to indicate when an attempted load has succeeded or failed.
+Consistent with a convention from Redux, we adopt an `enum` instead of an `isLoading` boolean value.[^2] This gives us more flexibility to indicate when an attempted load has succeeded or failed.
 
 ## AnimalsState
 
 Our `Animal` and `Category` types are the basic data models of our product. We still need to define a root State type which will be passed to our Reducer.
 
-Our convention for modeling state will follow a recommended convention from Redux JS. We “normalize” our data models.[^3] We conceptualize our root state as “domains” that can be thought of similarly to tables in a database. Each domain saves its data models through key-value pairs. For our product, these slices would be `Animals` and `Categories`. Let’s see what this looks like. Add a new Swift file under `Sources/AnimalsData`. Name this file `AnimalsState.swift`.
+Our convention for modeling state will follow a recommended convention from Redux. We “normalize” our data models.[^3] We conceptualize our root state as “domains” that can be thought of similarly to tables in a database. Each domain saves its data models through key-value pairs. For our product, these slices would be `Animals` and `Categories`. Let’s see what this looks like. Add a new Swift file under `Sources/AnimalsData`. Name this file `AnimalsState.swift`.
 
 ```swift
 //  AnimalsState.swift
@@ -245,7 +245,7 @@ extension AnimalsState {
 }
 ```
 
-Our `AnimalsState` is `public`, but the `animals` and `categories` are only `package`. We want these properties exposed to our test target, but our component graph should not be able to directly access the raw data. Following a convention from Redux, our Selectors will expose slices of state to our component graph. Our Selectors are `public`, but the exact structure of that state remains an opaque implementation detail.[^4]
+Our `AnimalsState` is `public`, but the `animals` and `categories` are only `package`. We want these properties exposed to our test target, but our component tree should not be able to directly access the raw data. Following a convention from Redux, our Selectors will expose slices of state to our component tree. Our Selectors are `public`, but the exact structure of that state remains an opaque implementation detail.[^4]
 
 Let’s add our `Categories` domain:
 
@@ -296,19 +296,19 @@ extension AnimalsState {
 
 Similar to `Categories`, we define a `data` property for efficient reading and writing of `Animal` values by a `key` and a `status` property to represent the loading status of our `Animal` values. Unlike our `Category` value, our `Animal` values can be edited and deleted. To save a loading status for specific `Animal` values, we can define a new `queue` property.
 
-These two domains are all we need to model the global state of our product. Do these two domains represent the *complete* state of our product? Our product offers the ability to edit and delete existing animals with a form. We also have the ability to add new animals. Does the state of this form belong in global state? Consistent with the convention from Redux JS, we choose to model this form data as component state.[^5] For additional state, we remember our “Window Test”. If our user opens two windows to see their data in two places at once, should a currently selected animal be reflected across both windows? We believe that it would be more appropriately modeled as component state; each window can track its own currently selected animal independently.
+These two domains are all we need to model the global state of our product. Do these two domains represent the *complete* state of our product? Our product offers the ability to edit and delete existing animals with a form. We also have the ability to add new animals. Does the state of this form belong in global state? Consistent with the convention from Redux, we choose to model this form data as component state.[^5] For additional state, we remember our “Window Test”. If our user opens two windows to see their data in two places at once, should a currently selected animal be reflected across both windows? We believe that it would be more appropriately modeled as component state; each window can track its own currently selected animal independently.
 
 We use `Dictionary` values to map `key` values to our data models. You might have questions about the performance of this data structure when our application grows very large. Swift Collections (like `Dictionary`) are copy-on-write data structures; when we copy the data structure and mutate the copy, our data structure copies all `n` elements. In Chapter 18, we investigate how we can add external dependencies to our module and import specialized data structures for improving CPU and memory usage. In Chapter 19, we benchmark and measure the performance of immutable data structures against SwiftData. For now, we will continue working just with the Standard Library (and `Dictionary`).
 
 ---
 
-Our next step is to define the `public` Selectors which select slices of state for displaying in our component graph. The sample application from Apple will be our guide: we clone the functionality. Let’s start by conceptualizing two “buckets” of Selectors: Selectors that operate on our `Categories` domain and Selectors that operate on our `Animals` domain. In more complex applications, Selectors might need to aggregate and deliver data across multiple domains all at once; we’re going to try and keep things simple for now while we are still learning.
+Our next step is to define the `public` Selectors which select slices of state for displaying in our component tree. The sample application from Apple will be our guide: we clone the functionality. Let’s start by conceptualizing two “buckets” of Selectors: Selectors that operate on our `Categories` domain and Selectors that operate on our `Animals` domain. In more complex applications, Selectors might need to aggregate and deliver data across multiple domains all at once; we’re going to try and keep things simple for now while we are still learning.
 
-Let’s begin with our `Categories` domain. Let’s think through the different operations needed to display data from our `Categories` domain in our component graph:
+Let’s begin with our `Categories` domain. Let’s think through the different operations needed to display data from our `Categories` domain in our component tree:
 
 * `SelectCategoriesValues`: The `CategoryList` displays `Category` values in sorted alphabetical order.
 * `SelectCategories`: We will also define a selector to return the `Dictionary` of all `Category` values without sorting applied; we will see how these two selectors work together to improve the performance of our `CategoryList` component.
-* `SelectCategoriesStatus`: We return the status of our most recent request to fetch `Category` values. We will use this to defend against some edge-casey behavior in our component graph and disable certain user events while `Category` values are being fetched.
+* `SelectCategoriesStatus`: We return the status of our most recent request to fetch `Category` values. We will use this to defend against some edge-casey behavior in our component tree and disable certain user events while `Category` values are being fetched.
 * `SelectCategory`: We return a `Category` value for a given `Category.ID` key. We would also like a selector to return a `Category` value for a given `Animal.ID` key: to return a `Mammal` for a `Cat`.
 
 We perform similar work for our `Animals` domain:
@@ -317,9 +317,9 @@ We perform similar work for our `Animals` domain:
 * `SelectAnimals`: Similar to `SelectCategories`, we define a Selector to return the `Dictionary` of `Animal` values for a specific `Category.ID` value without sorting applied.
 * `SelectAnimalsStatus`: Similar to `SelectCategoriesStatus`, we return the status of our most recent request to fetch `Animal` values.
 * `SelectAnimal`: We return a `Animal` value for a given `Animal.ID` key.
-* `SelectAnimalStatus`: Unlike `Category` values, `Animal` values can be edited and deleted. We track a `Status` for each `Animal.ID` value with an update pending. We use this value to defend against edge-casey behavior in our component graph where two windows might try to edit the same `Animal` at the same time.
+* `SelectAnimalStatus`: Unlike `Category` values, `Animal` values can be edited and deleted. We track a `Status` for each `Animal.ID` value with an update pending. We use this value to defend against edge-casey behavior in our component tree where two windows might try to edit the same `Animal` at the same time.
 
-These Selectors might seem a little abstract for now, but these will make more sense once we see them in action in our component graph. We could take a different approach and define these Selectors while we build our component graph. It’s a tradeoff; we prefer this approach for now to keep our focus on building the `AnimalsData` package before we turn our attention to our component graph.
+These Selectors might seem a little abstract for now, but these will make more sense once we see them in action in our component tree. We could take a different approach and define these Selectors while we build our component tree. It’s a tradeoff; we prefer this approach for now to keep our focus on building the `AnimalsData` package before we turn our attention to our component tree.
 
 Let’s begin with the `SelectCategories` Selector. This one will be one of the more simple Selectors.
 
@@ -418,7 +418,7 @@ extension AnimalsState {
 }
 ```
 
-Is this Selector really necessary? We already built `SelectCategories` to return all the `Category` values. Could we return all the `Category` values in our component graph and then choose our desired `Category` from that `Dictionary`? We could… but this could lead to performance problems. We want our component to recompute its `body` when the data returned by its Selectors changes. If we only care about *one* `Category` value, but our component is depending on *all* `Category` values, we are missing an opportunity to “scope” down our Selector to depend on only the data needed in that component. Our `Category` values are constant, but we still follow this convention because it is going to be very important for performance as we build more complex products that depend on state that changes over time.
+Is this Selector really necessary? We already built `SelectCategories` to return all the `Category` values. Could we return all the `Category` values in our component tree and then choose our desired `Category` from that `Dictionary`? We could… but this could lead to performance problems. We want our component to recompute its `body` when the data returned by its Selectors changes. If we only care about *one* `Category` value, but our component is depending on *all* `Category` values, we are missing an opportunity to “scope” down our Selector to depend on only the data needed in that component. Our `Category` values are constant, but we still follow this convention because it is going to be very important for performance as we build more complex products that depend on state that changes over time.
 
 In addition to returning the `Category` value for a `Category.ID`, we would also like an easy way to return the `Category` value for an `Animal.ID`.
 
@@ -574,7 +574,7 @@ extension AnimalsState {
 }
 ```
 
-Our last Selector returns a `Status` value for a given `Animal.ID`. We will use this to track when an `Animal` value might be waiting for a mutation; this value can be used in our component graph to prevent an edit from taking place while we are already trying to edit that same `Animal` value from another component.
+Our last Selector returns a `Status` value for a given `Animal.ID`. We will use this to track when an `Animal` value might be waiting for a mutation; this value can be used in our component tree to prevent an edit from taking place while we are already trying to edit that same `Animal` value from another component.
 
 ```swift
 //  AnimalsState.swift
@@ -597,13 +597,13 @@ extension AnimalsState {
 }
 ```
 
-These Selectors are `public` and deliver the data and state we need to display in our component graph. We wrote a lot of code, but we also learned some important things along the way that will help us when we build Selectors for more complex products.
+These Selectors are `public` and deliver the data and state we need to display in our component tree. We wrote a lot of code, but we also learned some important things along the way that will help us when we build Selectors for more complex products.
 
 ## AnimalsAction
 
-We learned some important lessons while building `CounterAction`. In that chapter, our action values represented user events from our component graph. Those user events were received by our Reducer, which mapped those user events to transformations on our State. The `ImmutableData` architecture requires that Reducer functions are synchronous and free of side effects. Let’s see how we build Action values when our product will perform work that is asynchronous.
+We learned some important lessons while building `CounterAction`. In that chapter, our action values represented user events from our component tree. Those user events were received by our Reducer, which mapped those user events to transformations on our State. The `ImmutableData` architecture requires that Reducer functions are synchronous and free of side effects. Let’s see how we build Action values when our product will perform work that is asynchronous.
 
-Let’s build and run the existing Animals sample app from Apple. Let’s run through the functionality and sketch out the user events we can document taking place from our component graph. Let’s think carefully and document only the user events that should affect our global state; events that should only affect local component state may be omitted.
+Let’s build and run the existing Animals sample app from Apple. Let’s run through the functionality and sketch out the user events we can document taking place from our component tree. Let’s think carefully and document only the user events that should affect our global state; events that should only affect local component state may be omitted.
 
 * The `CategoryList` component displays a button to reload the sample data from first launch.
 * The `AnimalList` component allows swiping on an Animal to delete. The option to delete a selected Animal is also available from the Menu Bar.
@@ -614,7 +614,7 @@ This is not a complete set of *all* user events — just the user events that sh
 
 There are two more subtle user events. When our `CategoryList` will be displayed, we want to fetch our Categories. When our `AnimalList` will be displayed, we want to fetch our Animals. We choose to transform our global state for efficiency and performance. A user can launch our product and open multiple windows on their macOS desktop. If every window performed an independent fetch, we would be fetching the same data multiple times. Transforming global state means we can keep track of our most recent fetch and prevent unnecessary fetches from consuming system resources.
 
-These Action values tell one side of our story: user events coming from our component graph. There is one more domain we want to support: data events coming from our persistent store. This product will need to support asynchronous operations to save its global state to a persistent store on our filesystem. We’re going to pass operations to our persistent store, wait for a response, and then dispatch an Action value back to our Reducer. In the same way that our “User Interface” domain was for action values that came from our component graph, our “Data” domain is for action values that come from our persistent store. Before we complete this chapter, we will see exactly how User Events are transformed into Data Events. For now, let’s concentrate on just defining what action values our persistent store would need to dispatch to our Reducer.
+These Action values tell one side of our story: user events coming from our component tree. There is one more domain we want to support: data events coming from our persistent store. This product will need to support asynchronous operations to save its global state to a persistent store on our filesystem. We’re going to pass operations to our persistent store, wait for a response, and then dispatch an Action value back to our Reducer. In the same way that our “User Interface” domain was for action values that came from our component tree, our “Data” domain is for action values that come from our persistent store. Before we complete this chapter, we will see exactly how User Events are transformed into Data Events. For now, let’s concentrate on just defining what action values our persistent store would need to dispatch to our Reducer.
 
 * The `Category` values were fetched.
 * The `Animal` values were fetched.
@@ -638,7 +638,7 @@ public enum AnimalsAction: Hashable, Sendable {
 }
 ```
 
-Our `UI` domain will be for action values coming from our component graph. Our `Data` domain will be for action values coming from our persistent store.
+Our `UI` domain will be for action values coming from our component tree. Our `Data` domain will be for action values coming from our persistent store.
 
 Let’s start with our `UI` domain. We define four sub-domains under `UI`: these map to four components.
 
@@ -1009,10 +1009,10 @@ extension PersistentSession {
 
 It looks like a lot of code, but let’s try and break things down step-by-step:
 
-* The `addAnimalMutation` that is `private` is a helper. It accepts six parameters: a `Dispatcher`, a `Selector`, and the four parameters passed from our component graph (`id`, `name`, `diet`, and `categoryId`). We attempt to run the `addAnimalMutation` operation from our `PersistentStore` instance with `name`, `diet`, and `categoryId` as parameters to the mutation. The `id` passed from our component graph is actually a “temp” id. We keep this for tracking a loading status. Our actual persistent store will be responsible for building its own `id` property on this new `Animal` instance.
+* The `addAnimalMutation` that is `private` is a helper. It accepts six parameters: a `Dispatcher`, a `Selector`, and the four parameters passed from our component tree (`id`, `name`, `diet`, and `categoryId`). We attempt to run the `addAnimalMutation` operation from our `PersistentStore` instance with `name`, `diet`, and `categoryId` as parameters to the mutation. The `id` passed from our component tree is actually a “temp” id. We keep this for tracking a loading status. Our actual persistent store will be responsible for building its own `id` property on this new `Animal` instance.
 * If the `addAnimalMutation` operation from our `PersistentStore` instance fails, we dispatch a `failure` action value to our `dispatcher` with the `id` and `error.localizedDescription` as associated values.
 * If the `addAnimalMutation` operation succeeds, we dispatch a `success` action value to our `dispatcher` with the `id` and `Animal` value as associated values.
-* The `addAnimalMutation` that is `internal` accepts the four parameters passed from our component graph (`id`, `name`, `diet`, and `categoryId`) and returns a closure that accepts two parameters: a `Dispatcher`, a `Selector`. This closure can then be passed to our `Dispatcher`.
+* The `addAnimalMutation` that is `internal` accepts the four parameters passed from our component tree (`id`, `name`, `diet`, and `categoryId`) and returns a closure that accepts two parameters: a `Dispatcher`, a `Selector`. This closure can then be passed to our `Dispatcher`.
 
 This functional style of programming — where functions return functions — is very common in Redux. The argument could be made that Swift is not a “true” functional programming language,[^10] but neither would be JavaScript. Like the original engineers behind React and Flux, we can bring ideas and concepts from functional programming to our preferred domain — even if our language is “multi-paradigm” and not exclusively functional.
 
@@ -1371,7 +1371,7 @@ extension Listener {
 }
 ```
 
-For our `Listener`, we don’t need to perform asynchronous operations when our `PersistentSession` dispatches Action values; it’s the other way around. When our component graph dispatches Action values, we read those values — after our Reducer has returned — and then begin our asynchronous operations on `PersistentSession`.
+For our `Listener`, we don’t need to perform asynchronous operations when our `PersistentSession` dispatches Action values; it’s the other way around. When our component tree dispatches Action values, we read those values — after our Reducer has returned — and then begin our asynchronous operations on `PersistentSession`.
 
 We can `break` over all the Action values that are not from the `AnimalsAction.UI` domain. For now, we only care about acting on the values from `AnimalsAction.UI`. Here is our next function:
 
@@ -1735,7 +1735,7 @@ A legit question here is why are we choosing to define two different Action valu
 
 In larger applications built from Flux and Redux, it is common to “reuse” action values across components. Two different components might display a Delete Animal button that dispatch the same action value. This is not an abuse of the architecture — this is ok.
 
-For our tutorial, we continue with the convention that we name actions by the component where they happened from. We don’t have a strong opinion about whether or not your own products should follow this convention, but we have some reasons for preferring this approach in our tutorials. One of the biggest skills we want engineers to practice is thinking declaratively. For engineers with experience building SwiftUI and SwiftData together, the natural instinct might be to tightly couple presentational component logic — which is declarative — with the imperative mutations needed to transform their global state. This is a very different approach from what we teach in `ImmutableData`. Your component graph should declaratively dispatch action values on important user events. Your component graph should not be thinking about *how* this action value will transform state; your component graph should be thinking about communicating *what* just happened.
+For our tutorial, we continue with the convention that we name actions by the component where they happened from. We don’t have a strong opinion about whether or not your own products should follow this convention, but we have some reasons for preferring this approach in our tutorials. One of the biggest skills we want engineers to practice is thinking declaratively. For engineers with experience building SwiftUI and SwiftData together, the natural instinct might be to tightly couple presentational component logic — which is declarative — with the imperative mutations needed to transform their global state. This is a very different approach from what we teach in `ImmutableData`. Your component tree should declaratively dispatch action values on important user events. Your component tree should not be thinking about *how* this action value will transform state; your component tree should be thinking about communicating *what* just happened.
 
 In complex products, you might map multiple component user events to just one action value. You must continue to think of your action value as a declarative event — *not* an imperative instruction. If you introduce an implicit “mental map” where multiple components dispatch one action value, that mental map should continue to tell the infra what happened — not how it should handle that event. If you try to map multiple components to one action value, and your action value subtly — or not so subtly — begins to look like an imperative instruction, slow down and think through what exactly this action value is communicating.
 
@@ -1946,7 +1946,7 @@ extension AnimalsReducer {
 }
 ```
 
-The `id` value is meant to be used as a “placeholder” identifier. We will see in our component graph where we generate this from. This does not map to the *actual* `Animal.ID` of this instance; that comes from our `PersistentStore` when the `Animal` is created. When we set our `animal` instance on our `animals.data` value, our `key` is the `animal.id` that came from our `PersistentStore`. Our `Status` values — `success` or `failure` — are saved on our `animals.queue` by the same `id` that was passed by our component graph.
+The `id` value is meant to be used as a “placeholder” identifier. We will see in our component tree where we generate this from. This does not map to the *actual* `Animal.ID` of this instance; that comes from our `PersistentStore` when the `Animal` is created. When we set our `animal` instance on our `animals.data` value, our `key` is the `animal.id` that came from our `PersistentStore`. Our `Status` values — `success` or `failure` — are saved on our `animals.queue` by the same `id` that was passed by our component tree.
 
 Here is a very similar function when our `Animal` value has been updated:
 
@@ -2105,13 +2105,13 @@ extension AnimalsFilter {
 }
 ```
 
-Filters can be powerful tools to improve performance, but we recommend to build your Filters with caution and care. Shipping a bug in a Filter can lead to unexpected results in your component graph: an Action value that *should* update your component seems to “drop on the floor” with no effect.
+Filters can be powerful tools to improve performance, but we recommend to build your Filters with caution and care. Shipping a bug in a Filter can lead to unexpected results in your component tree: an Action value that *should* update your component seems to “drop on the floor” with no effect.
 
 If you choose to implement Filters in your own Products, we *strongly* recommend that every Filter comes with a complete set of unit tests. These tests should pass every Action value in your domain to confirm this Filter behaves as expected.
 
-When in doubt, build your component graph *without* Filters. After you have tested and confirmed your component graph behaves as expected, you can then choose to introduce Filters.
+When in doubt, build your component tree *without* Filters. After you have tested and confirmed your component tree behaves as expected, you can then choose to introduce Filters.
 
-Our recommendation is that all Filters should return in `O(1)` constant time. Use filters only for quick and efficient checks. This implies that Filters should be prioritized for optimizing Selectors that run above constant time; an example would be a `O(n)` equality operation or `O(n log n)` sorting operation. We don’t see much benefit to allocate engineering resources to build Filters to optimize Selectors that are already running in constant time. This is not your “low hanging fruit” when looking for impact. When we build our component graph, we will see examples of Selectors where we would recommend not to build Filters.
+Our recommendation is that all Filters should return in `O(1)` constant time. Use filters only for quick and efficient checks. This implies that Filters should be prioritized for optimizing Selectors that run above constant time; an example would be a `O(n)` equality operation or `O(n log n)` sorting operation. We don’t see much benefit to allocate engineering resources to build Filters to optimize Selectors that are already running in constant time. This is not your “low hanging fruit” when looking for impact. When we build our component tree, we will see examples of Selectors where we would recommend not to build Filters.
 
 ## LocalStore
 
@@ -2124,7 +2124,7 @@ To clone the functionality of the sample app from Apple, we need to persist our 
 * We could use SQLite to persist our state. Apple does not ship high-level “wrappers” to make this as easy as working with SwiftData, but we could choose to write all that code (or import an external dependency from the open-source community).
 * We could use a flat file format like JSON to persist our state. This code might be simple, but comes with performance implications: writing any mutations to our filesystem is linear time. This is not an *incremental* store; it’s an *atomic* store.
 
-When we built the `ImmutableData` architecture, one important goal is to offer product engineers an alternative to SwiftData for managing global state from their SwiftUI component graph. That does not mean we need to stop using SwiftData — we just recommend using it from a different place. Instead of performing imperative logic on shared mutable state from our component graph directly on SwiftData, we teach how to use *declarative* logic from our component graph to affect transformations on shared mutable state. The data models our component graph sees are *immutable* value types — as opposed to a component graph built on SwiftData and mutable reference types.
+When we built the `ImmutableData` architecture, one important goal is to offer product engineers an alternative to SwiftData for managing global state from their SwiftUI component tree. That does not mean we need to stop using SwiftData — we just recommend using it from a different place. Instead of performing imperative logic on shared mutable state from our component tree directly on SwiftData, we teach how to use *declarative* logic from our component tree to affect transformations on shared mutable state. The data models our component tree sees are *immutable* value types — as opposed to a component tree built on SwiftData and mutable reference types.
 
 We’re going to see how SwiftData can be leveraged as a “back end” of our `ImmutableData` architecture. Inspired by Dave DeLong, our `ImmutableData` architecture can act as a legit abstraction-layer (or “front end”) on top of SwiftData.[^12]
 
@@ -2393,7 +2393,7 @@ extension LocalStore {
 }
 ```
 
-Similar to an approach from Dave DeLong,[^12] we fetch all the `CategoryModel` references and transform them to immutable `Category` values. Our component graph does not know that there is any SwiftData business-logic happening behind the curtains. As far as our component graph is concerned, its data models are immutable value types.
+Similar to an approach from Dave DeLong,[^12] we fetch all the `CategoryModel` references and transform them to immutable `Category` values. Our component tree does not know that there is any SwiftData business-logic happening behind the curtains. As far as our component tree is concerned, its data models are immutable value types.
 
 Here is `fetchAnimalsQuery`:
 
@@ -2555,9 +2555,9 @@ extension LocalStore {
 
 We erase all `CategoryModel` and `AnimalModel` references, and then insert our sample data.
 
-This tutorial is not intended to focus on teaching SwiftData, and we don’t intend to spend much time teaching advanced performance optimizations for SwiftData. Our `LocalStore` is a simple — but effective — demonstration of bringing the power of SwiftData and incremental database stores to our `ImmutableData` architecture. We don’t have to abandon SwiftData for good, we just keep it one place: out of our component graph.
+This tutorial is not intended to focus on teaching SwiftData, and we don’t intend to spend much time teaching advanced performance optimizations for SwiftData. Our `LocalStore` is a simple — but effective — demonstration of bringing the power of SwiftData and incremental database stores to our `ImmutableData` architecture. We don’t have to abandon SwiftData for good, we just keep it one place: out of our component tree.
 
-You might decide to iterate on this approach. You might decide to update your model schema. You might decide to refactor this whole class on SQLite. Because our component graph only knows about immutable value types delivered through `ImmutableData`, you have a lot of freedom to experiment: your component graph is not locked-down with any kind of hard-coded dependency on any specific strategy to persist data on your filesystem.
+You might decide to iterate on this approach. You might decide to update your model schema. You might decide to refactor this whole class on SQLite. Because our component tree only knows about immutable value types delivered through `ImmutableData`, you have a lot of freedom to experiment: your component tree is not locked-down with any kind of hard-coded dependency on any specific strategy to persist data on your filesystem.
 
 ---
 

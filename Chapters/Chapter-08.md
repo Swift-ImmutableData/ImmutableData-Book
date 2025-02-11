@@ -1,6 +1,6 @@
 # AnimalsUI
 
-We completed a lot of work to build the data models of our Animals product. Before we build our component graph, it might be helpful to rebuild the sample project from Apple to remember what we are cloning. We can count four main custom components for our product:
+We completed a lot of work to build the data models of our Animals product. Before we build our component tree, it might be helpful to rebuild the sample project from Apple to remember what we are cloning. We can count four main custom components for our product:
 
 * `CategoryList`: A component to display our `Category` values sorted by name.
 * `AnimalList`: A component to display our `Animal` values for one `Category` sorted by name.
@@ -115,11 +115,11 @@ extension ImmutableUI.Selector {
 }
 ```
 
-Our Animals product is simple enough that we will build our component graph all in one module. For larger projects, individual pieces of your product might have their own module: `AnimalsMessengerUI`, `AnimalsPhotosUI`, `AnimalsFeedUI`, and more. To save us from duplicating code, these extensions on `ImmutableUI` could live in just one place: `AnimalsUICore` or `AnimalsUIInfra`. Remember: the State of any product should save in just one `Store` instance; all components should be calling `ImmutableUI` with the same `Environment` value.
+Our Animals product is simple enough that we will build our component tree all in one module. For larger projects, individual pieces of your product might have their own module: `AnimalsMessengerUI`, `AnimalsPhotosUI`, `AnimalsFeedUI`, and more. To save us from duplicating code, these extensions on `ImmutableUI` could live in just one place: `AnimalsUICore` or `AnimalsUIInfra`. Remember: the State of any product should save in just one `Store` instance; all components should be calling `ImmutableUI` with the same `Environment` value.
 
 ## Dispatch
 
-Our `ImmutableUI.Dispatcher` returns an `ImmutableData.Dispatcher` type. This means we can dispatch action values *and* thunks. Our convention is that our product should only dispatch action values from its component graph; thunks should be dispatched from a `Listener`. We saw a similar approach for our Counter product.
+Our `ImmutableUI.Dispatcher` returns an `ImmutableData.Dispatcher` type. This means we can dispatch action values *and* thunks. Our convention is that our product should only dispatch action values from its component tree; thunks should be dispatched from a `Listener`. We saw a similar approach for our Counter product.
 
 Add a new Swift file under `Sources/AnimalsUI`. Name this file `Dispatch.swift`.
 
@@ -144,11 +144,11 @@ import SwiftUI
 }
 ```
 
-There might be some interesting use cases for a component graph to dispatch thunks directly, but we strongly feel that the right approach will almost always be to keep that work in a proper `Listener`. If you *really* want to dispatch a thunk from a component, you do have that ability; we just strongly recommend you build a `Listener`.
+There might be some interesting use cases for a component tree to dispatch thunks directly, but we strongly feel that the right approach will almost always be to keep that work in a proper `Listener`. If you *really* want to dispatch a thunk from a component, you do have that ability; we just strongly recommend you build a `Listener`.
 
 ## Select
 
-We defined several Selectors when we built `AnimalsState`. We will forward those Selectors to our component graph for displaying data. Add a new Swift file under `Sources/AnimalsUI`. Name this file `Select.swift`.
+We defined several Selectors when we built `AnimalsState`. We will forward those Selectors to our component tree for displaying data. Add a new Swift file under `Sources/AnimalsUI`. Name this file `Select.swift`.
 
 Our `ImmutableUI.Selector` requires us to define a `didChange` function to indicate that our slice of State has changed. Similar to our Counter product, we will define value equality to be our “default” `didChange` function.
 
@@ -207,7 +207,7 @@ extension ImmutableUI.Selector {
 }
 ```
 
-We can now begin to define the Selectors of our component graph. These will map to the Selectors we defined from `AnimalsState`. Let’s begin with `SelectCategoriesValues`:
+We can now begin to define the Selectors of our component tree. These will map to the Selectors we defined from `AnimalsState`. Let’s begin with `SelectCategoriesValues`:
 
 ```swift
 //  Select.swift
@@ -366,7 +366,7 @@ There isn’t a rule telling you that Selectors have to be defined in one file a
 
 ## PreviewStore
 
-Before we build and run our application, we will use Xcode Previews to see our component graph as we work. It will be helpful to build a way for Previews to run against a `Store` with our sample data already loaded. We already have this sample data loading in our `LocalStore`, but we would prefer something more lightweight just for Previews: `LocalStore` creates a SwiftData `ModelContext`. All we want is to load some data in-memory. We will only use this for Xcode Previews; we don’t plan to ship this to production.
+Before we build and run our application, we will use Xcode Previews to see our component tree as we work. It will be helpful to build a way for Previews to run against a `Store` with our sample data already loaded. We already have this sample data loading in our `LocalStore`, but we would prefer something more lightweight just for Previews: `LocalStore` creates a SwiftData `ModelContext`. All we want is to load some data in-memory. We will only use this for Xcode Previews; we don’t plan to ship this to production.
 
 Add a new Swift file under `Sources/AnimalsUI`. Name this file `PreviewStore.swift`. We’re going to build a component that forwards a `Store` to a `Provider`. We can then wrap the component we wish to preview with a `PreviewStore` component for it to read against sample data.
 
@@ -490,7 +490,7 @@ We’re about to build our first component for this product. Our `AnimalEditor` 
 
 The components we build for this product will be much more complex that what we built for our Counter application. This makes sense: our Data Model is more complex. Before we begin writing code, let’s explain what our approach to components will look like.
 
-Engineers from the React JS community had a pattern you might have heard about: Presenters and Containers.[^2] This patterns means different things to different people, but let’s just quickly focus on this observation from Dan Abramov:
+Engineers from the ReactJS community had a pattern you might have heard about: Presenters and Containers.[^2] This patterns means different things to different people, but let’s just quickly focus on this observation from Dan Abramov:
 
 * Presenter Components are concerned with *how things look*.
 * Container Components are concerned with *how things work*.
@@ -615,7 +615,7 @@ The `AnimalEditor.Presenter.AddAnimalData` type will be added later. This is jus
 
 As previously discussed, a robust discussion about error handling in production SwiftUI applications is outside the scope of this tutorial. Our focus is on teaching `ImmutableData`; error handling can be learned independently in a separate tutorial. For now, we just `print` an error if our `dispatch` failed.
 
-Remember, our goal here is to *think declaratively*. Our action values are not imperative instructions. Our component graph is not telling our `Store` what to do. Our component graph is telling our `Store` what just happened.
+Remember, our goal here is to *think declaratively*. Our action values are not imperative instructions. Our component tree is not telling our `Store` what to do. Our component tree is telling our `Store` what just happened.
 
 Here is the next action value:
 

@@ -12,12 +12,12 @@ At the core of the architecture is a unidirectional data flow:
 
 ```mermaid
 flowchart LR
-    accTitle: Data Flow in the ImmutableData Framework
-    accDescr: Data flows from action to state, and from state to view, in one direction only.
-    A[Action] --> B[State] --> C[View]
+  accTitle: Data Flow in the ImmutableData Framework
+  accDescr: Data flows from action to state, and from state to view, in one direction only.
+  A[Action] --> B[State] --> C[View]
 ```
 
-All global state data flows through the application following this basic pattern, and a strict separation of concerns is enforced. The actions *declare* what has occurred, whether user input, a server response, or a change in a device’s sensors, but they have no knowledge of the state or view layers. The state layer *reacts* to the “news” described by the action and updates the state accordingly. All logic for making changes to the state is contained within the state layer, but it knows nothing of the view layer. The views then *react* to the changes in the state layer as the new state flows through the component tree. Again, however, the view layer knows nothing about the state layer. By maintaining this strict unidirectional data flow and separation of concerns, our application code becomes easier to test, easier to reason about, easier to explain to new team members, and easier to update when new features are required. 
+All global state data flows through the application following this basic pattern, and a strict separation of concerns is enforced. The actions *declare* what has occurred, whether user input, a server response, or a change in a device’s sensors, but they have no knowledge of the state or view layers. The state layer *reacts* to the “news” described by the action and updates the state accordingly. All logic for making changes to the state is contained within the state layer, but it knows nothing of the view layer. The views then *react* to the changes in the state layer as the new state flows through the component tree. Again, however, the view layer knows nothing about the state layer. By maintaining this strict unidirectional data flow and separation of concerns, our application code becomes easier to test, easier to reason about, easier to explain to new team members, and easier to update when new features are required.
 
 Further, avoiding complexity like two-way data bindings, or the spaghetti engendered by mutability, allows our code to become clean, fast, and maintainable. This is the key difference between this application framework (and the ideas behind it) and other presentations of actions, state and view previously shown at WWDC.[^1] By avoiding direct mutations called from outside the state layer and embracing immutability instead, complexity vanishes and our code becomes much more robust.
 
@@ -54,19 +54,19 @@ This guide includes the following chapters:
 * [Chapter 02](Chapters/Chapter-02.md): We build the `ImmutableUI` module for making our global state available to SwiftUI view components.
 ### Part 2: Products
 * [Chapter 03](Chapters/Chapter-03.md): We build the data models of our Counter application: a simple SwiftUI app to increment and decrement an integer.
-* [Chapter 04](Chapters/Chapter-04.md): We build the component graph of our Counter application.
+* [Chapter 04](Chapters/Chapter-04.md): We build the component tree of our Counter application.
 * [Chapter 05](Chapters/Chapter-05.md): We build and run our Counter application.
 * [Chapter 06](Chapters/Chapter-06.md): We build the data models of our Animals application: a SwiftUI app to store a collection of data models with persistence to a local database.
-* [Chapter 07](Chapters/Chapter-07.md): We build a command-line utility for testing the data models of our Animals application without any component graph.
-* [Chapter 08](Chapters/Chapter-08.md): We build the component graph of our Animals application.
+* [Chapter 07](Chapters/Chapter-07.md): We build a command-line utility for testing the data models of our Animals application without any component tree.
+* [Chapter 08](Chapters/Chapter-08.md): We build the component tree of our Animals application.
 * [Chapter 09](Chapters/Chapter-09.md): We build and run our Animals application.
 * [Chapter 10](Chapters/Chapter-10.md): We build the data models of our Quakes application: a SwiftUI app to fetch a collection of data models from a remote server with persistence to a local database.
-* [Chapter 11](Chapters/Chapter-11.md): We build a command-line utility for testing the data models of our Quakes application without any component graph.
-* [Chapter 12](Chapters/Chapter-12.md): We build the component graph of our Quakes application.
+* [Chapter 11](Chapters/Chapter-11.md): We build a command-line utility for testing the data models of our Quakes application without any component tree.
+* [Chapter 12](Chapters/Chapter-12.md): We build the component tree of our Quakes application.
 * [Chapter 13](Chapters/Chapter-13.md): We build and run our Quakes application.
 * [Chapter 14](Chapters/Chapter-14.md): We update the data models of our Animals application to support persistence to a remote server.
 * [Chapter 15](Chapters/Chapter-15.md): We build an HTTP server for testing our new Animals application.
-* [Chapter 16](Chapters/Chapter-16.md): We build a command-line utility for testing the data models of our new Animals application without any component graph.
+* [Chapter 16](Chapters/Chapter-16.md): We build a command-line utility for testing the data models of our new Animals application without any component tree.
 * [Chapter 17](Chapters/Chapter-17.md): We build and run our new Animals application.
 ### Part 3: Performance
 * [Chapter 18](Chapters/Chapter-18.md): We learn about specialized data structures that can improve the performance of our applications when working with large amounts of data that is copied many times.

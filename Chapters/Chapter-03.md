@@ -18,7 +18,7 @@ Our Counter application is inspired by the Counter application for Redux.[^1]
 
 Every product we build on the `ImmutableData` architecture will share the same infra modules. Types like `Store` are generic across the State that a product engineer defines. Now that we are product engineering, it’s our job to define what State looks like for our product domain.
 
-Let’s have a quick review of a concept introduced earlier. We can think of two “buckets” of state that might describe our application at a moment in time. *Local State* — or *Component State* — can be thought of as ephemeral and transient state that reflects details about how our UI is displayed, but not details about the *data* that is driving that UI. We save Local State *locally* in our component graph using `SwiftUI.State`.
+Let’s have a quick review of a concept introduced earlier. We can think of two “buckets” of state that might describe our application at a moment in time. *Local State* — or *Component State* — can be thought of as ephemeral and transient state that reflects details about how our UI is displayed, but not details about the *data* that is driving that UI. We save Local State *locally* in our component tree using `SwiftUI.State`.
 
 Suppose we build an application for displaying a list of contacts. Our list could be very large and our list should support scrolling. The scroll position of our list component would be an example of what we consider Local State. Our list could also support filtering to search for contacts by name. The substring we currently use to search for contacts we consider Local State. Our list could also support sorting by name ascending or descending. Our sort order we consider Local State.
 
@@ -54,9 +54,9 @@ For all products built from the `ImmutableData` architecture, we model State as 
 
 Our `CounterState` is `public` because we import this type in our next package. Our `value` is `package` because we read this property in our test target. Our `value` is not `public`. To read this property in our next package, we define a Selector function. This is a simple function type; our Selector is trivial — we just return the `value`. A complex product with many subgraphs of components might define many different Selectors. Product Engineers have the ability to define as many Selectors as they might need.
 
-You might be wondering: what if every product defines only one Selector and returns the entire global state to every component? We built our `ImmutableUI.Selector` to update our component graph with `Observable` when the selected slice of state changes. As an optimization, we build every component to try and select the smallest slice of state it needs to display its data. If every component selects the *entire* global state this can lead to slower performance: state updates that do not affect a component lead to a component recomputing its `body` more times than necessary.[^2]
+You might be wondering: what if every product defines only one Selector and returns the entire global state to every component? We built our `ImmutableUI.Selector` to update our component tree with `Observable` when the selected slice of state changes. As an optimization, we build every component to try and select the smallest slice of state it needs to display its data. If every component selects the *entire* global state this can lead to slower performance: state updates that do not affect a component lead to a component recomputing its `body` more times than necessary.[^2]
 
-Here is our Selector function which returns our `value` to our component graph:
+Here is our Selector function which returns our `value` to our component tree:
 
 ```swift
 //  CounterState.swift
@@ -78,7 +78,7 @@ This is all we need to build `CounterState` for our product. This is a very simp
 
 As previously discussed, a goal with the `ImmutableData` architecture is to take the experience you have “thinking declaratively” for building graphs of view components and then use that experience to begin thinking declaratively about global state.
 
-In a SwiftUI application using SwiftData, our view component graph uses imperative logic on mutable model objects when it wants to transform global state. SwiftUI encourages you to think of “the what not the how” for building your view component graph. Let’s then think of “the what not the how” for managing our global state.
+In a SwiftUI application using SwiftData, our view component tree uses imperative logic on mutable model objects when it wants to transform global state. SwiftUI encourages you to think of “the what not the how” for building your view component tree. Let’s then think of “the what not the how” for managing our global state.
 
 Our SwiftUI counter application is very simple: an “Increment” button, a “Decrement” button, and a component to display the current value. Let’s start with the Increment Button. What happens when a user taps the Increment Button? In a SwiftData application, we could then perform some imperative logic on a mutable model object. Let’s think about how we would make this more declarative. How would a view component declare to a `Store` that a user taps the Increment Button? What would this action be called? Suppose you were to just tell me or another person what this action is for. What is the message you want to dispatch when a user taps the Increment Button? Let’s try to brainstorm some ideas about this.
 
@@ -111,6 +111,8 @@ Let’s review the role of Reducer function types in the `ImmutableData` archite
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow through Reducers
+  accDescr: Our reducer maps from a State and an Action to a new State.
   oldState[State] --> Reducer
   Action --> Reducer
   Reducer --> newState[State]
@@ -118,7 +120,7 @@ flowchart LR
 
 Just like Redux, our Reducer function types are pure functions without side effects that map a State and an Action to the next State of our system. In SwiftData, the global state of our system can be mutated at any time by any view component in our graph. In the `ImmutableData` architecture, *any and all* transformations of global state happen *only* because of an Action that is dispatched to our Reducer through our `Store`.
 
-When we built our Action, our goal was to *think declaratively*. Instead of building Action values that tell our `Store` *how* to behave, we build Action values that tell our `Store` *what* just happened. Now that we are building a Reducer, this *is* the appropriate place to think imperatively. Our goal will be to transform the declarative messages from our component graph to imperative logic that returns a new State.
+When we built our Action, our goal was to *think declaratively*. Instead of building Action values that tell our `Store` *how* to behave, we build Action values that tell our `Store` *what* just happened. Now that we are building a Reducer, this *is* the appropriate place to think imperatively. Our goal will be to transform the declarative messages from our component tree to imperative logic that returns a new State.
 
 Our first sample application product is very simple; this is by design. The concepts and patterns we see in this chapter demonstrate some of the most important opinions and philosophies in the `ImmutableData` architecture. Instead of just writing code, take some time to think through what it is we are building. What opinions are we making? How are those opinions different than what you might have experienced working with SwiftData?
 
@@ -171,7 +173,7 @@ CounterData
         └── CounterStateTests.swift
 ```
 
-These three types represent the data model layer of our first sample application product. We are ready to build the view component graph in our next steps. Let’s quickly review some important concepts we discussed that will also apply to all products we build on this architecture:
+These three types represent the data model layer of our first sample application product. We are ready to build the view component tree in our next steps. Let’s quickly review some important concepts we discussed that will also apply to all products we build on this architecture:
 
 * We model our State as an immutable value type. Our recommendation is to use a `struct`.
 * We model our Action as an immutable value type. Our recommendation is to use an `enum`.

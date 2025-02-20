@@ -4,6 +4,8 @@ Let’s think back to the fundamental role Reducers play in Redux and `Immutable
 
 ```mermaid
 flowchart LR
+  accTitle: Data Flow through Reducers
+  accDescr: Our reducer maps from a State and an Action to a new State.
   oldState[State] --> Reducer
   Action --> Reducer
   Reducer --> newState[State]
@@ -19,19 +21,19 @@ Let’s go back and learn a little more about the evolution of Flux and Redux, t
 
 The original Flux Architecture did not require Data Stores to contain only immutable data. Flux did not *require* mutable data models, but the common tutorials and examples were presented on mutable data models. An Action value would be dispatched to a Store, and a Store would perform an imperative mutation on a reference to a mutable data model: an Array or a Dictionary.[^1] Similar to Objective-C, the JavaScript standard library collections were reference types.
 
-One year after Flux was announced, Lee Byron introduced the Immutable JS framework with some ambitious goals: adding immutable value semantics on JavaScript objects while *also* optimizing for performance.[^2]
+One year after Flux was announced, Lee Byron introduced the ImmutableJS framework with some ambitious goals: adding immutable value semantics on JavaScript objects while *also* optimizing for performance.[^2]
 
 Conventional wisdom might tell you that if you want to copy a Dictionary of N elements *by value*, you must copy N elements. This is linear time: the amount of space and time to perform a copy scales linearly with the amount of elements in the Dictionary. If a Dictionary contains N elements, and you wish to add one new element while *also* preserving the original Dictionary, you must copy N elements to construct a new Dictionary.
 
-The insight of Immutable JS was to use HAMT data structures as the “backing store” of a new Immutable Dictionary type.[^3] This type followed value semantics: immutability was enforced as the type was built. What HAMTs delivered was *fast* performance: structural sharing gave product engineers a `O(log n)` operation to perform copies. At scale, this was a big improvement over the `O(n)` operation to copy all N elements of our Dictionary. Because our Immutable Dictionary follows values semantics, these two values are now independent: adding one new element to our copy does not mutate our original.
+The insight of ImmutableJS was to use HAMT data structures as the “backing store” of a new Immutable Dictionary type.[^3] This type followed value semantics: immutability was enforced as the type was built. What HAMTs delivered was *fast* performance: structural sharing gave product engineers a `O(log n)` operation to perform copies. At scale, this was a big improvement over the `O(n)` operation to copy all N elements of our Dictionary. Because our Immutable Dictionary follows values semantics, these two values are now independent: adding one new element to our copy does not mutate our original.
 
 It was now possible to build Flux stores with Immutable Data without performing an `O(n)` operation on every Action that was dispatched to our Store. Redux took this one step further by *requiring* immutable data models in Stores.[^4] Immutable data improved predictability and testability: Reducers were pure functions without side effects. Immutable Data also gave Redux the opportunity to perform some performance optimizations: checking if two state values might have changed could now be performed with a reference equality check in constant time, as opposed to a value equality check in linear time.
 
-Swift ships with first-class support for value types: structs and enumerations. In languages that were primarily object-oriented, adding value semantics to your application often meant adding new code on top of the language itself: Immutable JS brought value semantics to JavaScript collections and Remodel brought value semantics to Objective-C objects.[^5] In Swift, value semantics are provided by the language itself: we don’t need a library or framework.
+Swift ships with first-class support for value types: structs and enumerations. In languages that were primarily object-oriented, adding value semantics to your application often meant adding new code on top of the language itself: ImmutableJS brought value semantics to JavaScript collections and Remodel brought value semantics to Objective-C objects.[^5] In Swift, value semantics are provided by the language itself: we don’t need a library or framework.
 
-In a Swift Reducer, we can transform a `Dictionary` and return a new `Dictionary`. These are value types: the original `Dictionary` is unchanged. The `Dictionary` provided by the Swift standard library will perform a `O(n)` operation to copy its values. To preserve value semantics while *also* optimizing performance, we would like a data structure similar to Immutable JS: an immutable Dictionary with a logarithmic operation to perform copies.
+In a Swift Reducer, we can transform a `Dictionary` and return a new `Dictionary`. These are value types: the original `Dictionary` is unchanged. The `Dictionary` provided by the Swift standard library will perform a `O(n)` operation to copy its values. To preserve value semantics while *also* optimizing performance, we would like a data structure similar to ImmutableJS: an immutable Dictionary with a logarithmic operation to perform copies.
 
-The [`Swift-Collections`][^6] repo is maintained by Apple engineers, but ships outside the Swift standard library. The `TreeDictionary` data structure from `Swift-Collections` is built from CHAMP data structures.[^7] Like the HAMT data structures in Immutable JS, the `TreeDictionary` data structure can perform copies in logarithmic time. Compared to linear time, this is a huge improvement when our State saves many values.
+The [`Swift-Collections`][^6] repo is maintained by Apple engineers, but ships outside the Swift standard library. The `TreeDictionary` data structure from `Swift-Collections` is built from CHAMP data structures.[^7] Like the HAMT data structures in ImmutableJS, the `TreeDictionary` data structure can perform copies in logarithmic time. Compared to linear time, this is a huge improvement when our State saves many values.
 
 We built two sample products that save a `Dictionary` value in State: Our Animals product saved a `Dictionary` of `Category` values and a `Dictionary` of `Animal` values, and our Quakes product saved a `Dictionary` of `Quake` values. For the most part, migrating to `TreeDictionary` is easy; it’s not a 100-percent drop-in replacement, but it’s pretty close. The basic APIs for reading and writing values remain the same.
 

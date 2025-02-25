@@ -1495,26 +1495,152 @@ extension ModelContext {
 }
 ```
 
-Our `LocalStore` actor will conform to `ModelActor`. To help keep expensive work off our `main` thread, we construct our `ModelContext` on demand with `lazy`:
+Similar to our Animals product, we construct a `ModelActor` for performing work on SwiftData:
 
 ```swift
 //  LocalStore.swift
 
-final public actor LocalStore: ModelActor, PersistentSessionLocalStore {
-  nonisolated lazy public var modelExecutor: any ModelExecutor = {
-    let modelContext = ModelContext(self.modelContainer)
+final package actor ModelActor: SwiftData.ModelActor {
+  package nonisolated let modelContainer: ModelContainer
+  package nonisolated let modelExecutor: any ModelExecutor
+  
+  fileprivate init(modelContainer: ModelContainer) {
+    self.modelContainer = modelContainer
+    let modelContext = ModelContext(modelContainer)
     modelContext.autosaveEnabled = false
-    return DefaultSerialModelExecutor(modelContext: modelContext)
-  }()
-  nonisolated public let modelContainer: ModelContainer
+    self.modelExecutor = DefaultSerialModelExecutor(modelContext: modelContext)
+  }
+}
+```
+
+We set `autosaveEnabled` to `false` to workaround a potential issue from SwiftUI.[^5]
+
+Let’s turn our attention to the functions declared from `PersistentSessionLocalStore`. Here is our query to fetch all `Quake` values saved in our local database:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func fetchLocalQuakesQuery() throws -> Array<Quake> {
+    let array = try self.modelContext.fetch(QuakeModel.self)
+    return array.map { model in model.quake() }
+  }
+}
+```
+
+This should look familiar to what we built for our Animals product. Our `LocalStore` operates on `QuakeModel` classes, but we return immutable `Quake` values to our component tree. Our component tree does not need to know about `QuakeModel`: this is an implementation detail.
+
+Here is our mutation for updating our local database with `Quake` values from our remote server:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  package struct Error: Swift.Error {
+    package enum Code: Equatable {
+      case quakeNotFound
+    }
+    
+    package let code: Self.Code
+  }
+}
+
+extension ModelActor {
+  fileprivate func didFetchRemoteQuakesMutation(
+    inserted: Array<Quake>,
+    updated: Array<Quake>,
+    deleted: Array<Quake>
+  ) throws {
+    for quake in inserted {
+      let model = quake.model()
+      self.modelContext.insert(model)
+    }
+    if updated.isEmpty == false {
+      let set = Set(updated.map { $0.quakeId })
+      let predicate = #Predicate<QuakeModel> { model in
+        set.contains(model.quakeId)
+      }
+      let dictionary = Dictionary(uniqueKeysWithValues: updated.map { ($0.quakeId, $0) })
+      for model in try self.modelContext.fetch(predicate) {
+        guard
+          let quake = dictionary[model.quakeId]
+        else {
+          throw Error(code: .quakeNotFound)
+        }
+        model.update(with: quake)
+      }
+    }
+    if deleted.isEmpty == false {
+      let set = Set(deleted.map { $0.quakeId })
+      let predicate = #Predicate<QuakeModel> { model in
+        set.contains(model.quakeId)
+      }
+      try self.modelContext.delete(
+        model: QuakeModel.self,
+        where: predicate
+      )
+    }
+    try self.modelContext.save()
+  }
+}
+```
+
+Let’s think through what we are trying to accomplish:
+
+* We begin by iterating through our `inserted` values. These are new `Quake` values that did not previously exist in our state. We iterate through every `Quake` value, create a `QuakeModel`, and insert that model in our `ModelContext`.
+* We iterate through our `updated` values. These are existing `Quake` values with some new data that should be saved. We fetch the necessary `QuakeModel` references and update each one with the new data. To defend against an “unnecessary quadratic”, we transform our `Array` of `Quake` values to a `Dictionary` in linear time. We can then select a `Quake` value for a `Quake.ID` in constant time.
+* We iterate through our `deleted` values. These are existing `Quake` values that should be deleted. We construct a `Predicate` to delete the necessary `QuakeModel` references and forward that to our `ModelContext`.
+* We save our `ModelContext`.
+
+In a production application, we would spend a lot more time profiling and optimizing this function to continue improving performance. Since our goal is continue focusing on `ImmutableData`, we do not spend much more time focusing on SwiftData performance. This is an important topic; it’s just not the right topic for us at this time. The good news is that `LocalStore` is an `actor`: all this work will be performed off our `main` thread.
+
+Here is our mutation for deleting one `Quake` value:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func deleteLocalQuakeMutation(quakeId: Quake.ID) throws {
+    let predicate = #Predicate<QuakeModel> { model in
+      model.quakeId == quakeId
+    }
+    try self.modelContext.delete(
+      model: QuakeModel.self,
+      where: predicate
+    )
+    try self.modelContext.save()
+  }
+}
+```
+
+Here is our mutation for deleting all `Quake` values:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func deleteLocalQuakesMutation() throws {
+    try self.modelContext.delete(model: QuakeModel.self)
+    try self.modelContext.save()
+  }
+}
+```
+
+We can now build our `LocalStore` with a similar pattern to our Animals product:
+
+```swift
+//  LocalStore.swift
+
+final public actor LocalStore {
+  lazy package var modelActor = ModelActor(modelContainer: self.modelContainer)
+  
+  private let modelContainer: ModelContainer
   
   private init(modelContainer: ModelContainer) {
     self.modelContainer = modelContainer
   }
 }
 ```
-
-We set `autosaveEnabled` to `false` to workaround a potential issue from SwiftUI.[^5]
 
 Here is a new `private` constructor to help us in our next steps:
 
@@ -1569,113 +1695,34 @@ extension LocalStore {
 }
 ```
 
-Let’s turn our attention to the functions declared from `PersistentSessionLocalStore`. Here is our query to fetch all `Quake` values saved in our local database:
+Here are the functions declared from `PersistentSessionLocalStore` forwarded to our `ModelActor`:
 
 ```swift
 //  LocalStore.swift
 
-extension LocalStore {
-  public func fetchLocalQuakesQuery() throws -> Array<Quake> {
-    let array = try self.modelContext.fetch(QuakeModel.self)
-    return array.map { model in model.quake() }
+extension LocalStore: PersistentSessionLocalStore {
+  public func fetchLocalQuakesQuery() async throws -> Array<Quake> {
+    try await self.modelActor.fetchLocalQuakesQuery()
   }
-}
-```
-
-This should look familiar to what we built for our Animals product. Our `LocalStore` operates on `QuakeModel` classes, but we return immutable `Quake` values to our component tree. Our component tree does not need to know about `QuakeModel`: this is an implementation detail.
-
-Here is our mutation for updating our local database with `Quake` values from our remote server:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  package struct Error: Swift.Error {
-    package enum Code: Equatable {
-      case quakeNotFound
-    }
-    
-    package let code: Self.Code
-  }
-}
-
-extension LocalStore {
+  
   public func didFetchRemoteQuakesMutation(
     inserted: Array<Quake>,
     updated: Array<Quake>,
     deleted: Array<Quake>
-  ) throws {
-    for quake in inserted {
-      let model = quake.model()
-      self.modelContext.insert(model)
-    }
-    if updated.isEmpty == false {
-      let set = Set(updated.map { $0.quakeId })
-      let predicate = #Predicate<QuakeModel> { model in
-        set.contains(model.quakeId)
-      }
-      let dictionary = Dictionary(uniqueKeysWithValues: updated.map { ($0.quakeId, $0) })
-      for model in try self.modelContext.fetch(predicate) {
-        guard
-          let quake = dictionary[model.quakeId]
-        else {
-          throw Error(code: .quakeNotFound)
-        }
-        model.update(with: quake)
-      }
-    }
-    if deleted.isEmpty == false {
-      let set = Set(deleted.map { $0.quakeId })
-      let predicate = #Predicate<QuakeModel> { model in
-        set.contains(model.quakeId)
-      }
-      try self.modelContext.delete(
-        model: QuakeModel.self,
-        where: predicate
-      )
-    }
-    try self.modelContext.save()
-  }
-}
-```
-
-Let’s think through what we are trying to accomplish:
-
-* We begin by iterating through our `inserted` values. These are new `Quake` values that did not previously exist in our state. We iterate through every `Quake` value, create a `QuakeModel`, and insert that model in our `ModelContext`.
-* We iterate through our `updated` values. These are existing `Quake` values with some new data that should be saved. We fetch the necessary `QuakeModel` references and update each one with the new data. To defend against an “unnecessary quadratic”, we transform our `Array` of `Quake` values to a `Dictionary` in linear time. We can then select a `Quake` value for a `Quake.ID` in constant time.
-* We iterate through our `deleted` values. These are existing `Quake` values that should be deleted. We construct a `Predicate` to delete the necessary `QuakeModel` references and forward that to our `ModelContext`.
-* We save our `ModelContext`.
-
-In a production application, we would spend a lot more time profiling and optimizing this function to continue improving performance. Since our goal is continue focusing on `ImmutableData`, we do not spend much more time focusing on SwiftData performance. This is an important topic; it’s just not the right topic for us at this time. The good news is that `LocalStore` is an `actor`: all this work will be performed off our `main` thread.
-
-Here is our mutation for deleting one `Quake` value:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  public func deleteLocalQuakeMutation(quakeId: Quake.ID) throws {
-    let predicate = #Predicate<QuakeModel> { model in
-      model.quakeId == quakeId
-    }
-    try self.modelContext.delete(
-      model: QuakeModel.self,
-      where: predicate
+  ) async throws {
+    try await self.modelActor.didFetchRemoteQuakesMutation(
+      inserted: inserted,
+      updated: updated,
+      deleted: deleted
     )
-    try self.modelContext.save()
   }
-}
-```
-
-Here is our mutation for deleting all `Quake` values:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  public func deleteLocalQuakesMutation() throws {
-    try self.modelContext.delete(model: QuakeModel.self)
-    try self.modelContext.save()
+  
+  public func deleteLocalQuakeMutation(quakeId: Quake.ID) async throws {
+    try await self.modelActor.deleteLocalQuakeMutation(quakeId: quakeId)
+  }
+  
+  public func deleteLocalQuakesMutation() async throws {
+    try await self.modelActor.deleteLocalQuakesMutation()
   }
 }
 ```

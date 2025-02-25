@@ -15,22 +15,44 @@ Engineers are already using Swift to build server-side applications.[^1] One of 
 
 Up to this point, the code we wrote has been almost all new. We refrained from introducing external dependencies and repos. We don’t really want there to be anything “magic” about what we are building. We built the `ImmutableData` infra and we built three sample application products against that infra. Building an HTTP server in Swift is a very specialized task. Learning how to build this technology ourselves might be interesting, but it should not block our goal of teaching `ImmutableData`. We’re going to use Vapor to move fast.
 
+We’re also going to import the [`AsyncAlgorithms`][^3] repo from Apple. This is helpful for when we iterate over a sequence of values that perform asynchronous operations.
+
 Our Animals product has the ability to read data with queries and write data with mutations. We would like our server to persist that data across launches. The Vapor ecosystem ships Fluent for persisting data in a database. We’re going to take a shortcut. Instead of learning how Fluent works, let’s just use our `LocalStore`.
 
-Select the `AnimalsData` package and open `Sources/AnimalsDataServer/main.swift`. Let’s begin with some utilities on `LocalStore` for transforming a `RemoteRequest` to a `RemoteResponse`:
+Select the `AnimalsData` package and open `Sources/AnimalsDataServer/main.swift`. Let’s begin with some utilities for mapping an asynchronous operation over a sequence of values:
 
 ```swift
 //  main.swift
 
 import AnimalsData
+import AsyncAlgorithms
 import Foundation
 import Vapor
 
+extension Sequence {
+  public func map<Transformed>(_ transform: @escaping @Sendable (Self.Element) async throws -> Transformed) async rethrows -> Array<Transformed> {
+    try await self.async.map(transform)
+  }
+}
+
+extension AsyncSequence {
+  fileprivate func map<Transformed>(_ transform: @escaping @Sendable (Self.Element) async throws -> Transformed) async rethrows -> Array<Transformed> {
+    let map: AsyncThrowingMapSequence = self.map(transform)
+    return try await Array(map)
+  }
+}
+```
+
+Let’s add some utilities on `LocalStore` for transforming a `RemoteRequest` to a `RemoteResponse`:
+
+```swift
+//  main.swift
+
 extension LocalStore {
-  fileprivate func response(request: RemoteRequest) throws -> RemoteResponse {
+  fileprivate func response(request: RemoteRequest) async throws -> RemoteResponse {
     RemoteResponse(
-      query: try self.response(query: request.query),
-      mutation: try self.response(mutation: request.mutation)
+      query: try await self.response(query: request.query),
+      mutation: try await self.response(mutation: request.mutation)
     )
   }
 }
@@ -44,14 +66,14 @@ Here is how we build the `query` and the `mutation` of our `RemoteResponse`:
 //  main.swift
 
 extension LocalStore {
-  private func response(query: Array<RemoteRequest.Query>?) throws -> Array<RemoteResponse.Query>? {
-    try query?.map { query in try self.response(query: query) }
+  private func response(query: Array<RemoteRequest.Query>?) async throws -> Array<RemoteResponse.Query>? {
+    try await query?.map { query in try await self.response(query: query) }
   }
 }
 
 extension LocalStore {
-  private func response(mutation: Array<RemoteRequest.Mutation>?) throws -> Array<RemoteResponse.Mutation>? {
-    try mutation?.map { mutation in try self.response(mutation: mutation) }
+  private func response(mutation: Array<RemoteRequest.Mutation>?) async throws -> Array<RemoteResponse.Mutation>? {
+    try await mutation?.map { mutation in try await self.response(mutation: mutation) }
   }
 }
 ```
@@ -62,13 +84,13 @@ We need to transform a `RemoteRequest.Query` value to a `RemoteResponse.Query`:
 //  main.swift
 
 extension LocalStore {
-  private func response(query: RemoteRequest.Query) throws -> RemoteResponse.Query {
+  private func response(query: RemoteRequest.Query) async throws -> RemoteResponse.Query {
     switch query {
     case .animals:
-      let animals = try self.fetchAnimalsQuery()
+      let animals = try await self.fetchAnimalsQuery()
       return .animals(animals: animals)
     case .categories:
-      let categories = try self.fetchCategoriesQuery()
+      let categories = try await self.fetchCategoriesQuery()
       return .categories(categories: categories)
     }
   }
@@ -81,19 +103,19 @@ We need to transform a `RemoteRequest.Mutation` value to a `RemoteResponse.Mutat
 //  main.swift
 
 extension LocalStore {
-  private func response(mutation: RemoteRequest.Mutation) throws -> RemoteResponse.Mutation {
+  private func response(mutation: RemoteRequest.Mutation) async throws -> RemoteResponse.Mutation {
     switch mutation {
     case .addAnimal(name: let name, diet: let diet, categoryId: let categoryId):
-      let animal = try self.addAnimalMutation(name: name, diet: diet, categoryId: categoryId)
+      let animal = try await self.addAnimalMutation(name: name, diet: diet, categoryId: categoryId)
       return .addAnimal(animal: animal)
     case .updateAnimal(animalId: let animalId, name: let name, diet: let diet, categoryId: let categoryId):
-      let animal = try self.updateAnimalMutation(animalId: animalId, name: name, diet: diet, categoryId: categoryId)
+      let animal = try await self.updateAnimalMutation(animalId: animalId, name: name, diet: diet, categoryId: categoryId)
       return .updateAnimal(animal: animal)
     case .deleteAnimal(animalId: let animalId):
-      let animal = try self.deleteAnimalMutation(animalId: animalId)
+      let animal = try await self.deleteAnimalMutation(animalId: animalId)
       return .deleteAnimal(animal: animal)
     case .reloadSampleData:
-      let (animals, categories) = try self.reloadSampleDataMutation()
+      let (animals, categories) = try await self.reloadSampleDataMutation()
       return .reloadSampleData(animals: animals, categories: categories)
     }
   }
@@ -323,3 +345,4 @@ With a minimal amount of new code, we not only have an HTTP server running to de
 
 [^1]: https://www.swift.org/documentation/server/
 [^2]: https://www.swift.org/getting-started/vapor-web-server/
+[^3]: https://github.com/apple/swift-async-algorithms

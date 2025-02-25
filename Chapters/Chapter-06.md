@@ -2280,14 +2280,20 @@ extension UUID : IncrementalStoreUUID {
 
 The `Foundation.UUID` type will be our production type used to generate identifiers. We will build our own `IncrementalStoreUUID` test double with a stub `uuidString` when testing.
 
-Here is the main declaration of our `LocalStore` class:
+Working on SwiftData can be expensive in terms of performance; we want to keep expensive work off our `main` thread. Let’s build an actor for managing our work on SwiftData. For the most part, we follow the implementation provided by the `ModelActor` macro. We are going to perform a little custom work in our constructor: we create a new actor and adopt `ModelActor` directly.
+
+Here is the main declaration of our `ModelActor` class:
 
 ```swift
 //  LocalStore.swift
 
-final public actor LocalStore<UUID> : ModelActor, PersistentSessionPersistentStore where UUID : IncrementalStoreUUID {
-  nonisolated lazy public var modelExecutor: any ModelExecutor = {
-    let modelContext = ModelContext(self.modelContainer)
+final package actor ModelActor<UUID> : SwiftData.ModelActor where UUID : IncrementalStoreUUID {
+  package nonisolated let modelContainer: ModelContainer
+  package nonisolated let modelExecutor: any ModelExecutor
+  
+  fileprivate init(modelContainer: ModelContainer) {
+    self.modelContainer = modelContainer
+    let modelContext = ModelContext(modelContainer)
     modelContext.autosaveEnabled = false
     do {
       let count = try modelContext.fetchCount(CategoryModel.self)
@@ -2311,9 +2317,202 @@ final public actor LocalStore<UUID> : ModelActor, PersistentSessionPersistentSto
     } catch {
       fatalError("\(error)")
     }
-    return DefaultSerialModelExecutor(modelContext: modelContext)
-  }()
-  nonisolated public let modelContainer: ModelContainer
+    self.modelExecutor = DefaultSerialModelExecutor(modelContext: modelContext)
+  }
+}
+```
+
+Our `ModelContext` will perform its operations off `main`, but this seems to lead to some unexpected behaviors in SwiftUI apps when `autosaveEnabled` is `true`.[^14] We set this property to `false` and perform our save operations manually as we dispatch mutations.
+
+If our `ModelContext` returns zero `CategoryModel` references, this is the first time we launched our app: we insert the sample data and save.
+
+Let’s turn our attention to the functions we defined on `PersistentSessionPersistentStore`. We have six functions to implement: two queries and four mutations. These six functions will map to the fetches and mutations on our `ModelContext`. Let’s begin with `fetchCategoriesQuery`:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func fetchCategoriesQuery() throws -> Array<Category> {
+    let array = try self.modelContext.fetch(CategoryModel.self)
+    return array.map { model in model.category() }
+  }
+}
+```
+
+Similar to an approach from Dave DeLong,[^12] we fetch all the `CategoryModel` references and transform them to immutable `Category` values. Our component tree does not know that there is any SwiftData business-logic happening behind the curtains. As far as our component tree is concerned, its data models are immutable value types.
+
+Here is `fetchAnimalsQuery`:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func fetchAnimalsQuery() throws -> Array<Animal> {
+    let array = try self.modelContext.fetch(AnimalModel.self)
+    return array.map { model in model.animal() }
+  }
+}
+
+```
+
+At this point, you might notice an opportunity for an optimization. The `SelectAnimalsValues` Selector displays a sorted `Array` of `Animal` values for a `Category.ID`. Our `fetchAnimalsQuery` fetches *all* `Animal` values from our `PersistentStore`. When our `AnimalList` component will appear, an optimization would be to only fetch the `Animal` values for the `Category.ID` being displayed. This would be an important optimization at production scale. For our tutorial, we can track this optimization as a `TODO`.
+
+Here is `addAnimalMutation`:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func addAnimalMutation(
+    name: String,
+    diet: Animal.Diet,
+    categoryId: Category.ID
+  ) throws -> Animal {
+    let animal = Animal(
+      animalId: UUID().uuidString,
+      name: name,
+      diet: diet,
+      categoryId: categoryId
+    )
+    let model = animal.model()
+    self.modelContext.insert(model)
+    try self.modelContext.save()
+    return animal
+  }
+}
+```
+
+We overloaded the `UUID` type with our generic constraint. In production code, we will use `Foundation.UUID`. Collisions on `Foundation.UUID` — where the same identifier is generated more than once — are possible at a non-zero probability, but optimizing for that scale is outside the scope of this tutorial. You are welcome to explore more robust solutions in your own products if you require more safety.
+
+Here is `updateAnimalMutation`:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  package struct Error: Swift.Error {
+    package enum Code: Hashable, Sendable {
+      case animalNotFound
+    }
+    
+    package let code: Self.Code
+  }
+}
+
+extension ModelActor {
+  fileprivate func updateAnimalMutation(
+    animalId: Animal.ID,
+    name: String,
+    diet: Animal.Diet,
+    categoryId: Category.ID
+  ) throws -> Animal {
+    let predicate = #Predicate<AnimalModel> { model in
+      model.animalId == animalId
+    }
+    let array = try self.modelContext.fetch(predicate)
+    guard
+      let model = array.first
+    else {
+      throw Self.Error(code: .animalNotFound)
+    }
+    model.name = name
+    model.diet = diet.rawValue
+    model.categoryId = categoryId
+    try self.modelContext.save()
+    let animal = model.animal()
+    return animal
+  }
+}
+```
+
+If we found an `AnimalModel` reference for this `Animal.ID`, we mutate its properties, save the model, and return the updated `Animal` value. If our `Animal.ID` returned no `AnimalModel` reference, we throw an error.
+
+Here is `deleteAnimalMutation`:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func deleteAnimalMutation(animalId: Animal.ID) throws -> Animal {
+    let predicate = #Predicate<AnimalModel> { model in
+      model.animalId == animalId
+    }
+    let array = try self.modelContext.fetch(predicate)
+    guard
+      let model = array.first
+    else {
+      throw Self.Error(code: .animalNotFound)
+    }
+    self.modelContext.delete(model)
+    try self.modelContext.save()
+    return model.animal()
+  }
+}
+```
+
+Here is `reloadSampleDataMutation`:
+
+```swift
+//  LocalStore.swift
+
+extension ModelActor {
+  fileprivate func reloadSampleDataMutation() throws -> (
+    animals: Array<Animal>,
+    categories: Array<Category>
+  ) {
+    try self.modelContext.delete(model: CategoryModel.self)
+    self.modelContext.insert(Category.amphibian.model())
+    self.modelContext.insert(Category.bird.model())
+    self.modelContext.insert(Category.fish.model())
+    self.modelContext.insert(Category.invertebrate.model())
+    self.modelContext.insert(Category.mammal.model())
+    self.modelContext.insert(Category.reptile.model())
+    
+    try self.modelContext.delete(model: AnimalModel.self)
+    self.modelContext.insert(Animal.dog.model())
+    self.modelContext.insert(Animal.cat.model())
+    self.modelContext.insert(Animal.kangaroo.model())
+    self.modelContext.insert(Animal.gibbon.model())
+    self.modelContext.insert(Animal.sparrow.model())
+    self.modelContext.insert(Animal.newt.model())
+    
+    try self.modelContext.save()
+    
+    return (
+      animals: [
+        Animal.dog,
+        Animal.cat,
+        Animal.kangaroo,
+        Animal.gibbon,
+        Animal.sparrow,
+        Animal.newt,
+      ],
+      categories: [
+        Category.amphibian,
+        Category.bird,
+        Category.fish,
+        Category.invertebrate,
+        Category.mammal,
+        Category.reptile,
+      ]
+    )
+  }
+}
+```
+
+We erase all `CategoryModel` and `AnimalModel` references, and then insert our sample data.
+
+The `ModelActor` macro “eagerly” constructs its `ModelContext`. The implication is that SwiftData performs its work on the same thread that created the `ModelActor`.[^15] We are going to create `LocalStore` on `main`, but we do *not* want SwiftData to block `main` with expensive work. We can add more flexibility by building our `ModelActor` with `lazy`. After our `LocalStore` is constructed, we will then create our `ModelActor` — and our `ModelContext` — on demand and off `main`.
+
+Here is the main declaration of our `LocalStore`:
+
+```swift
+//  LocalStore.swift
+
+final public actor LocalStore<UUID> where UUID : IncrementalStoreUUID {
+  lazy package var modelActor = ModelActor<UUID>(modelContainer: self.modelContainer)
+  
+  private let modelContainer: ModelContainer
   
   private init(modelContainer: ModelContainer) {
     self.modelContainer = modelContainer
@@ -2321,11 +2520,7 @@ final public actor LocalStore<UUID> : ModelActor, PersistentSessionPersistentSto
 }
 ```
 
-Our `LocalStore` actor adopts `ModelActor` and `PersistentSessionPersistentStore`. Our `LocalStore` is generic with a dependency on a `IncrementalStoreUUID`. For the most part, we follow the implementation provided by the `ModelActor` macro. The `ModelActor` macro “eagerly” constructs its `ModelContext`. The implication is that SwiftData performs its work on the same thread that created the `ModelActor`.[^14] We are going to create `LocalStore` on `main`, but we do *not* want SwiftData to block `main` with expensive work. We can add more flexibility by building our `ModelExecutor` with `lazy`. After our `LocalStore` is constructed, we will then create our `ModelExecutor` — and our `ModelContext` — on demand and off `main`.
-
-Our `ModelContext` will perform its operations off `main`, but this seems to lead to some unexpected behaviors in SwiftUI apps when `autosaveEnabled` is `true`.[^15] We set this property to `false` and perform our save operations manually as we dispatch mutations.
-
-If our `ModelContext` returns zero `CategoryModel` references, this is the first time we launched our app: we insert the sample data and save.
+We expose our `ModelActor` as `package` for our unit tests — this will not be used directly from our component tree.
 
 We can save ourselves some work with an additional constructor:
 
@@ -2380,180 +2575,58 @@ extension LocalStore {
 }
 ```
 
-Let’s turn our attention to `PersistentSessionPersistentStore`. We have six functions to implement: two queries and four mutations. Let’s begin with `fetchCategoriesQuery`:
+Let’s turn our attention to `PersistentSessionPersistentStore`. We have six functions to implement: two queries and four mutations. All we have to do is forward these functions to our `ModelActor`:
 
 ```swift
 //  LocalStore.swift
 
-extension LocalStore {
-  public func fetchCategoriesQuery() throws -> Array<Category> {
-    let array = try self.modelContext.fetch(CategoryModel.self)
-    return array.map { model in model.category() }
+extension LocalStore: PersistentSessionPersistentStore {
+  public func fetchAnimalsQuery() async throws -> Array<Animal> {
+    try await self.modelActor.fetchAnimalsQuery()
   }
-}
-```
-
-Similar to an approach from Dave DeLong,[^12] we fetch all the `CategoryModel` references and transform them to immutable `Category` values. Our component tree does not know that there is any SwiftData business-logic happening behind the curtains. As far as our component tree is concerned, its data models are immutable value types.
-
-Here is `fetchAnimalsQuery`:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  public func fetchAnimalsQuery() throws -> Array<Animal> {
-    let array = try self.modelContext.fetch(AnimalModel.self)
-    return array.map { model in model.animal() }
-  }
-}
-```
-
-At this point, you might notice an opportunity for an optimization. The `SelectAnimalsValues` Selector displays a sorted `Array` of `Animal` values for a `Category.ID`. Our `fetchAnimalsQuery` fetches *all* `Animal` values from our `PersistentStore`. When our `AnimalList` component will appear, an optimization would be to only fetch the `Animal` values for the `Category.ID` being displayed. This would be an important optimization at production scale. For our tutorial, we can track this optimization as a `TODO`.
-
-Here is `addAnimalMutation`:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
+  
   public func addAnimalMutation(
     name: String,
     diet: Animal.Diet,
-    categoryId: Category.ID
-  ) throws -> Animal {
-    let animal = Animal(
-      animalId: UUID().uuidString,
+    categoryId: String
+  ) async throws -> Animal {
+    try await self.modelActor.addAnimalMutation(
       name: name,
       diet: diet,
       categoryId: categoryId
     )
-    let model = animal.model()
-    self.modelContext.insert(model)
-    try self.modelContext.save()
-    return animal
   }
-}
-```
-
-We overloaded the `UUID` type with our generic constraint. In production code, we will use `Foundation.UUID`. Collisions on `Foundation.UUID` — where the same identifier is generated more than once — are possible at a non-zero probability, but optimizing for that scale is outside the scope of this tutorial. You are welcome to explore more robust solutions in your own products if you require more safety.
-
-Here is `updateAnimalMutation`:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  package struct Error: Swift.Error {
-    package enum Code: Hashable, Sendable {
-      case animalNotFound
-    }
-    
-    package let code: Self.Code
-  }
-}
-
-extension LocalStore {
+  
   public func updateAnimalMutation(
-    animalId: Animal.ID,
+    animalId: String,
     name: String,
     diet: Animal.Diet,
-    categoryId: Category.ID
-  ) throws -> Animal {
-    let predicate = #Predicate<AnimalModel> { model in
-      model.animalId == animalId
-    }
-    let array = try self.modelContext.fetch(predicate)
-    guard
-      let model = array.first
-    else {
-      throw Self.Error(code: .animalNotFound)
-    }
-    model.name = name
-    model.diet = diet.rawValue
-    model.categoryId = categoryId
-    try self.modelContext.save()
-    let animal = model.animal()
-    return animal
+    categoryId: String
+  ) async throws -> Animal {
+    try await self.modelActor.updateAnimalMutation(
+      animalId: animalId,
+      name: name,
+      diet: diet,
+      categoryId: categoryId
+    )
   }
-}
-```
-
-If we found an `AnimalModel` reference for this `Animal.ID`, we mutate its properties, save the model, and return the updated `Animal` value. If our `Animal.ID` returned no `AnimalModel` reference, we throw an error.
-
-Here is `deleteAnimalMutation`:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  public func deleteAnimalMutation(animalId: Animal.ID) throws -> Animal {
-    let predicate = #Predicate<AnimalModel> { model in
-      model.animalId == animalId
-    }
-    let array = try self.modelContext.fetch(predicate)
-    guard
-      let model = array.first
-    else {
-      throw Self.Error(code: .animalNotFound)
-    }
-    self.modelContext.delete(model)
-    try self.modelContext.save()
-    return model.animal()
+  
+  public func deleteAnimalMutation(animalId: String) async throws -> Animal {
+    try await self.modelActor.deleteAnimalMutation(animalId: animalId)
   }
-}
-```
-
-Here is our last mutation:
-
-```swift
-//  LocalStore.swift
-
-extension LocalStore {
-  public func reloadSampleDataMutation() throws -> (
+  
+  public func fetchCategoriesQuery() async throws -> Array<Category> {
+    try await self.modelActor.fetchCategoriesQuery()
+  }
+  
+  public func reloadSampleDataMutation() async throws -> (
     animals: Array<Animal>,
     categories: Array<Category>
   ) {
-    try self.modelContext.delete(model: CategoryModel.self)
-    self.modelContext.insert(Category.amphibian.model())
-    self.modelContext.insert(Category.bird.model())
-    self.modelContext.insert(Category.fish.model())
-    self.modelContext.insert(Category.invertebrate.model())
-    self.modelContext.insert(Category.mammal.model())
-    self.modelContext.insert(Category.reptile.model())
-    
-    try self.modelContext.delete(model: AnimalModel.self)
-    self.modelContext.insert(Animal.dog.model())
-    self.modelContext.insert(Animal.cat.model())
-    self.modelContext.insert(Animal.kangaroo.model())
-    self.modelContext.insert(Animal.gibbon.model())
-    self.modelContext.insert(Animal.sparrow.model())
-    self.modelContext.insert(Animal.newt.model())
-    
-    try self.modelContext.save()
-    
-    return (
-      animals: [
-        Animal.dog,
-        Animal.cat,
-        Animal.kangaroo,
-        Animal.gibbon,
-        Animal.sparrow,
-        Animal.newt,
-      ],
-      categories: [
-        Category.amphibian,
-        Category.bird,
-        Category.fish,
-        Category.invertebrate,
-        Category.mammal,
-        Category.reptile,
-      ]
-    )
+    try await self.modelActor.reloadSampleDataMutation()
   }
 }
 ```
-
-We erase all `CategoryModel` and `AnimalModel` references, and then insert our sample data.
 
 This tutorial is not intended to focus on teaching SwiftData, and we don’t intend to spend much time teaching advanced performance optimizations for SwiftData. Our `LocalStore` is a simple — but effective — demonstration of bringing the power of SwiftData and incremental database stores to our `ImmutableData` architecture. We don’t have to abandon SwiftData for good, we just keep it one place: out of our component tree.
 
@@ -2602,5 +2675,5 @@ We spent a lot of time completing this package, but we also learned a lot. Our A
 [^11]: https://redux.js.org/usage/structuring-reducers/splitting-reducer-logic
 [^12]: https://davedelong.com/blog/2021/04/03/core-data-and-swiftui/
 [^13]: https://fatbobman.com/en/posts/reinventing-core-data-development-with-swiftdata-principles/#enums-and-codable
-[^14]: https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/#the-secret-of-the-modelactor-macro
-[^15]: https://developer.apple.com/forums/thread/761637
+[^14]: https://developer.apple.com/forums/thread/761637
+[^15]: https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/#the-secret-of-the-modelactor-macro

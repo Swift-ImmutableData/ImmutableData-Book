@@ -15,7 +15,7 @@ Engineers are already using Swift to build server-side applications.[^1] One of 
 
 Up to this point, the code we wrote has been almost all new. We refrained from introducing external dependencies and repos. We don’t really want there to be anything “magic” about what we are building. We built the `ImmutableData` infra and we built three sample application products against that infra. Building an HTTP server in Swift is a very specialized task. Learning how to build this technology ourselves might be interesting, but it should not block our goal of teaching `ImmutableData`. We’re going to use Vapor to move fast.
 
-We’re also going to import the [`AsyncAlgorithms`][^3] repo from Apple. This is helpful for when we iterate over a sequence of values that perform asynchronous operations.
+We’re also going to import the [`Swift-Async-Algorithms`][^3] repo from Apple. This is helpful for when we iterate over a sequence of values that perform asynchronous operations.
 
 Our Animals product has the ability to read data with queries and write data with mutations. We would like our server to persist that data across launches. The Vapor ecosystem ships Fluent for persisting data in a database. We’re going to take a shortcut. Instead of learning how Fluent works, let’s just use our `LocalStore`.
 

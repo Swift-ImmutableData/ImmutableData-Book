@@ -81,6 +81,8 @@ You can find more repos on our `ImmutableData` GitHub organization:
 * [`ImmutableData-Samples`](https://github.com/Swift-ImmutableData/ImmutableData-Samples) includes empty Swift packages, empty Xcode projects, and an empty Xcode workspace. This is the recommended way to complete our tutorial. The workspace provides some basic setup (like adding dependencies between packages) that will let you focus on our tutorial.
 * [`ImmutableData-Benchmarks`](https://github.com/Swift-ImmutableData/ImmutableData-Benchmarks) includes benchmarks to measure performance. These benchmarks will be discussed in Chapter 19.
 * [`ImmutableData`](https://github.com/Swift-ImmutableData/ImmutableData) is the “standalone” repo package of the `ImmutableData` infra. This is for product engineers that want to use the infra in their products without building the infra from scratch.
+* [`ImmutableData-Legacy`](https://github.com/Swift-ImmutableData/ImmutableData-Legacy) is a version of the `ImmutableData` infra that deploys to older operating systems.
+* [`ImmutableData-FoodTruck`](https://github.com/Swift-ImmutableData/ImmutableData-FoodTruck) is an incremental migration tutorial. We begin with an app from Apple built on a legacy architecture. We then show how the `ImmutableData` infra can be used to incrementally migrate individual components and product surfaces *without* changing the behavior of components and product surfaces built on the legacy infra. We show how `ImmutableData` can “coexist” with a legacy architecture.
 
 ## License
 

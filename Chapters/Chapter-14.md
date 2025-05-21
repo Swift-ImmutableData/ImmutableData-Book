@@ -315,7 +315,7 @@ extension RemoteStore {
 }
 ```
 
-In the next chapter, we will use Vapor to build a server that runs on `localhost`. The `URL` endpoint will accept a `POST` request and return JSON.
+In the [next chapter](./Chapter-15.md), we will use [Vapor][] to build a server that runs on `localhost`. The `URL` endpoint will accept a `POST` request and return JSON.
 
 We can now add the functions to conform to `PersistentSessionPersistentStore`. Let’s begin with `fetchCategoriesQuery`:
 
@@ -577,3 +577,5 @@ Similarly, our `RemoteStore` is built on `URLSession` and an endpoint that prese
 [^4]: https://graphql.org/learn/
 [^5]: https://engineering.fb.com/2015/09/14/core-infra/graphql-a-data-query-language/
 [^6]: https://engineering.fb.com/2015/09/14/core-infra/relay-declarative-data-for-react-applications/
+
+[vapor]: https://vapor.codes/

@@ -103,5 +103,5 @@ To be fair, there are more advanced techniques that can perform asynchronous and
 
 Migrating to `ImmutableData` fixes both these problems for us: it’s an “abstraction layer” that makes it easy to keep expensive SwiftData operations asynchronous and concurrent, and it delivers immutable value types to our component tree.
 
-[^1]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0364-retroactive-conformance-warning.md
-[^2]: https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/
+[^1]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0364-retroactive-conformance-warning.md>
+[^2]: <https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/>

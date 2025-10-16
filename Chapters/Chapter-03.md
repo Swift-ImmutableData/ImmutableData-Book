@@ -181,5 +181,5 @@ These three types represent the data model layer of our first sample application
 
 Our previous chapters built the infra modules that are shared across sample application products. This chapter was our first experience building code tied to the specific domain of just one product, but we discussed some important opinions and philosophies that we will use throughout our tutorials.
 
-[^1]: https://redux.js.org/tutorials/quick-start
-[^2]: https://swiftui-lab.com/random-lessons/#data-5
+[^1]: <https://redux.js.org/tutorials/quick-start>
+[^2]: <https://swiftui-lab.com/random-lessons/#data-5>

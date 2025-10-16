@@ -2662,18 +2662,18 @@ AnimalsData
 
 We spent a lot of time completing this package, but we also learned a lot. Our Animals product shows us how the `ImmutableData` architecture scales to asynchronous operations and side effects that are not allowed from Reducer functions. We build a `LocalStore` implementation on SwiftData, but we could have chosen SQLite, Core Data, or another solution for a persistent database. In Chapter 14, we will even see how easy it is to implement this product on a remote store: we build a server for persisting state.
 
-[^1]: https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app
-[^2]: https://redux.js.org/tutorials/fundamentals/part-7-standard-patterns#loading-state-enum-values
-[^3]: https://redux.js.org/usage/structuring-reducers/normalizing-state-shape
-[^4]: https://redux.js.org/usage/deriving-data-selectors#encapsulating-state-shape-with-selectors
-[^5]: https://redux.js.org/tutorials/fundamentals/part-5-ui-react#global-state-component-state-and-forms
-[^6]: https://developer.apple.com/documentation/swiftdata/filtering-and-sorting-persistent-data#Add-a-sort-parameter-to-order-data
-[^7]: https://redux.js.org/style-guide/#keep-state-minimal-and-derive-additional-values
-[^8]: https://developer.apple.com/documentation/swift/result
-[^9]: https://redux.js.org/usage/writing-logic-thunks
-[^10]: https://robnapier.net/swift-is-not-functional
-[^11]: https://redux.js.org/usage/structuring-reducers/splitting-reducer-logic
-[^12]: https://davedelong.com/blog/2021/04/03/core-data-and-swiftui/
-[^13]: https://fatbobman.com/en/posts/reinventing-core-data-development-with-swiftdata-principles/#enums-and-codable
-[^14]: https://developer.apple.com/forums/thread/761637
-[^15]: https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/#the-secret-of-the-modelactor-macro
+[^1]: <https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app>
+[^2]: <https://redux.js.org/tutorials/fundamentals/part-7-standard-patterns#loading-state-enum-values>
+[^3]: <https://redux.js.org/usage/structuring-reducers/normalizing-state-shape>
+[^4]: <https://redux.js.org/usage/deriving-data-selectors#encapsulating-state-shape-with-selectors>
+[^5]: <https://redux.js.org/tutorials/fundamentals/part-5-ui-react#global-state-component-state-and-forms>
+[^6]: <https://developer.apple.com/documentation/swiftdata/filtering-and-sorting-persistent-data#Add-a-sort-parameter-to-order-data>
+[^7]: <https://redux.js.org/style-guide/#keep-state-minimal-and-derive-additional-values>
+[^8]: <https://developer.apple.com/documentation/swift/result>
+[^9]: <https://redux.js.org/usage/writing-logic-thunks>
+[^10]: <https://robnapier.net/swift-is-not-functional>
+[^11]: <https://redux.js.org/usage/structuring-reducers/splitting-reducer-logic>
+[^12]: <https://davedelong.com/blog/2021/04/03/core-data-and-swiftui/>
+[^13]: <https://fatbobman.com/en/posts/reinventing-core-data-development-with-swiftdata-principles/#enums-and-codable>
+[^14]: <https://developer.apple.com/forums/thread/761637>
+[^15]: <https://fatbobman.com/en/posts/concurret-programming-in-swiftdata/#the-secret-of-the-modelactor-macro>

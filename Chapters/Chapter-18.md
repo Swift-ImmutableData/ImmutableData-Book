@@ -59,13 +59,13 @@ Are these data structures the right choice for your own products? It depends. `T
 
 If you plan to experiment with these data structures, our advice is to read the appropriate documentation to understand more about the performance tradeoffs. We also recommend measuring your performance with benchmarks. Measure CPU and memory before and after your migration to quantify how these data structures could be impactful in your own products.
 
-[^1]: https://www.youtube.com/watch?v=i__969noyAM
-[^2]: https://www.youtube.com/watch?v=I7IdS-PbEgI
-[^3]: https://en.wikipedia.org/wiki/Hash_array_mapped_trie
-[^4]: https://redux.js.org/faq/immutable-data
-[^5]: https://engineering.fb.com/2016/04/13/ios/building-and-managing-ios-model-objects-with-remodel/
-[^6]: https://github.com/apple/swift-collections
-[^7]: https://github.com/apple/swift-collections/pull/31
-[^8]: https://www.youtube.com/watch?v=m9JZmP9E12M
-[^9]: https://github.com/Swift-CowBox/Swift-CowBox
-[^10]: https://github.com/Swift-CowBox/Swift-CowBox-Sample
+[^1]: <https://www.youtube.com/watch?v=i__969noyAM>
+[^2]: <https://www.youtube.com/watch?v=I7IdS-PbEgI>
+[^3]: <https://en.wikipedia.org/wiki/Hash_array_mapped_trie>
+[^4]: <https://redux.js.org/faq/immutable-data>
+[^5]: <https://engineering.fb.com/2016/04/13/ios/building-and-managing-ios-model-objects-with-remodel/>
+[^6]: <https://github.com/apple/swift-collections>
+[^7]: <https://github.com/apple/swift-collections/pull/31>
+[^8]: <https://www.youtube.com/watch?v=m9JZmP9E12M>
+[^9]: <https://github.com/Swift-CowBox/Swift-CowBox>
+[^10]: <https://github.com/Swift-CowBox/Swift-CowBox-Sample>

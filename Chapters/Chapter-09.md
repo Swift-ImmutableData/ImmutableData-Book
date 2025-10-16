@@ -182,5 +182,5 @@ As of this writing, these launch arguments — which were originally built for C
 
 We completed two sample products: Counter and Animals. Both applications are built from `ImmutableData`. We specify our product domain when we construct our `Store`, but the `ImmutableData` infra *itself* did not change. Our infra deployed to both products without additional work. We’re going to use that same infra — without making changes to that infra — to begin a new sample product in our next chapter.
 
-[^1]: https://www.avanderlee.com/xcode/overriding-userdefaults-launch-arguments/
-[^2]: https://useyourloaf.com/blog/debugging-core-data/
+[^1]: <https://www.avanderlee.com/xcode/overriding-userdefaults-launch-arguments/>
+[^2]: <https://useyourloaf.com/blog/debugging-core-data/>

@@ -571,9 +571,9 @@ Our `LocalStore` was built to persist data to our filesystem using SwiftData. We
 
 Similarly, our `RemoteStore` is built on `URLSession` and an endpoint that presents a GraphQL-inspired API. These are arbitrary; your own products might look very different, and that’s ok.
 
-[^1]: https://martinfowler.com/distributedComputing/soft.pdf
-[^2]: https://developer.apple.com/videos/play/wwdc2024/10138/
-[^3]: https://nshipster.com/nsincrementalstore/
-[^4]: https://graphql.org/learn/
-[^5]: https://engineering.fb.com/2015/09/14/core-infra/graphql-a-data-query-language/
-[^6]: https://engineering.fb.com/2015/09/14/core-infra/relay-declarative-data-for-react-applications/
+[^1]: <https://martinfowler.com/distributedComputing/soft.pdf>
+[^2]: <https://developer.apple.com/videos/play/wwdc2024/10138/>
+[^3]: <https://nshipster.com/nsincrementalstore/>
+[^4]: <https://graphql.org/learn/>
+[^5]: <https://engineering.fb.com/2015/09/14/core-infra/graphql-a-data-query-language/>
+[^6]: <https://engineering.fb.com/2015/09/14/core-infra/relay-declarative-data-for-react-applications/>

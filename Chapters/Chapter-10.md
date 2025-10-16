@@ -1927,9 +1927,9 @@ QuakesData
 
 We wrote a lot of code, but most of these ideas and concepts are also built in our Animals product. Our biggest difference is we are now supporting a data model with a local database *and* a remote server.
 
-[^1]: https://developer.apple.com/documentation/swiftdata/maintaining-a-local-copy-of-server-data
-[^2]: https://developer.apple.com/documentation/xcode/understanding-hangs-in-your-app
-[^3]: https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php
-[^4]: https://developer.apple.com/forums/thread/761536
-[^5]: https://developer.apple.com/forums/thread/761637
-[^6]: https://developer.apple.com/forums/thread/770288
+[^1]: <https://developer.apple.com/documentation/swiftdata/maintaining-a-local-copy-of-server-data>
+[^2]: <https://developer.apple.com/documentation/xcode/understanding-hangs-in-your-app>
+[^3]: <https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php>
+[^4]: <https://developer.apple.com/forums/thread/761536>
+[^5]: <https://developer.apple.com/forums/thread/761637>
+[^6]: <https://developer.apple.com/forums/thread/770288>

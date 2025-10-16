@@ -49,5 +49,5 @@ This sample application is very simple; all of our state is *global state*: just
 
 Finally, we want to discuss some very important topics for front-end engineering: internationalization, localization, and accessibility. Internationalization and localization is the process of presenting data in formats and languages most appropriate for users.[^1] Accessibility is the process of presenting data in a way that everyone can understand your product, including people with disabilities that might use assistive technologies.[^2] Building applications for *all* users is an important goal, but is mostly a discussion about *presentation* of data. This can be learned orthogonally to the `ImmutableData` architecture. We encourage you to explore the resources available from Apple for learning more about these best practices.
 
-[^1]: https://developer.apple.com/localization/
-[^2]: https://developer.apple.com/accessibility/
+[^1]: <https://developer.apple.com/localization/>
+[^2]: <https://developer.apple.com/accessibility/>

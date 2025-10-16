@@ -1650,5 +1650,5 @@ QuakesUI
 
 Our Quakes product has some big differences compared to our Animals product. Our Animals product used a local database for reading and writing data. Our Quakes product uses a remote server for reading data and a local database for writing data. The good news is that our component tree does not need to know about this: `ImmutableData` is an abstraction-layer. From the component tree, both products interact with `ImmutableData` in similar ways: we select data with Selectors and we dispatch actions on user events.
 
-[^1]: https://developer.apple.com/documentation/mapkit/mapkit_for_swiftui
-[^2]: https://developer.apple.com/forums/thread/771084
+[^1]: <https://developer.apple.com/documentation/mapkit/mapkit_for_swiftui>
+[^2]: <https://developer.apple.com/forums/thread/771084>

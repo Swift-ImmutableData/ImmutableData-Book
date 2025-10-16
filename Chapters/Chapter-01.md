@@ -497,22 +497,22 @@ As we discussed, our tutorials are not intended to teach unit testing. We want t
 
 When you checkout our `chapter-01` branch, you can see the completed work for this chapter. We also include unit tests. You have the option to review our tests; you can also checkout every `chapter` branch to see the tests we choose to include for every chapter of our tutorials.
 
-[^1]: https://zapier.com/engineering/how-to-build-redux/
-[^2]: https://github.com/eBay/TDD-Albums
-[^3]: https://github.com/vanvoorden/TDD-Albums-II
-[^4]: https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app
-[^5]: https://developer.apple.com/documentation/swiftdata/maintaining-a-local-copy-of-server-data
-[^6]: https://medium.com/swlh/the-case-for-flux-379b7d1982c6
-[^7]: https://medium.com/code-cartoons/a-cartoon-intro-to-redux-3afb775501a6
-[^8]: https://redux.js.org/understanding/thinking-in-redux/glossary#state
-[^9]: https://redux.js.org/understanding/thinking-in-redux/glossary#action
-[^10]: https://redux.js.org/understanding/thinking-in-redux/glossary#reducer
-[^11]: https://redux.js.org/understanding/thinking-in-redux/glossary#store
-[^12]: https://redux.js.org/api/store#dispatchaction
-[^13]: https://en.wikipedia.org/wiki/Thunk
-[^14]: https://redux.js.org/usage/side-effects-approaches#thunks
-[^15]: https://redux.js.org/usage/deriving-data-selectors#calculating-derived-data-with-selectors
-[^16]: https://redux.js.org/usage/side-effects-approaches#listeners
-[^17]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0406-async-stream-backpressure.md
-[^18]: https://developer.apple.com/documentation/swift/asyncstream/continuation/bufferingpolicy
-[^19]: https://github.com/apple/swift-async-algorithms/blob/main/Sources/AsyncAlgorithms/AsyncAlgorithms.docc/Guides/Channel.md
+[^1]: <https://zapier.com/engineering/how-to-build-redux/>
+[^2]: <https://github.com/eBay/TDD-Albums>
+[^3]: <https://github.com/vanvoorden/TDD-Albums-II>
+[^4]: <https://developer.apple.com/documentation/swiftdata/adding-and-editing-persistent-data-in-your-app>
+[^5]: <https://developer.apple.com/documentation/swiftdata/maintaining-a-local-copy-of-server-data>
+[^6]: <https://medium.com/swlh/the-case-for-flux-379b7d1982c6>
+[^7]: <https://medium.com/code-cartoons/a-cartoon-intro-to-redux-3afb775501a6>
+[^8]: <https://redux.js.org/understanding/thinking-in-redux/glossary#state>
+[^9]: <https://redux.js.org/understanding/thinking-in-redux/glossary#action>
+[^10]: <https://redux.js.org/understanding/thinking-in-redux/glossary#reducer>
+[^11]: <https://redux.js.org/understanding/thinking-in-redux/glossary#store>
+[^12]: <https://redux.js.org/api/store#dispatchaction>
+[^13]: <https://en.wikipedia.org/wiki/Thunk>
+[^14]: <https://redux.js.org/usage/side-effects-approaches#thunks>
+[^15]: <https://redux.js.org/usage/deriving-data-selectors#calculating-derived-data-with-selectors>
+[^16]: <https://redux.js.org/usage/side-effects-approaches#listeners>
+[^17]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0406-async-stream-backpressure.md>
+[^18]: <https://developer.apple.com/documentation/swift/asyncstream/continuation/bufferingpolicy>
+[^19]: <https://github.com/apple/swift-async-algorithms/blob/main/Sources/AsyncAlgorithms/AsyncAlgorithms.docc/Guides/Channel.md>

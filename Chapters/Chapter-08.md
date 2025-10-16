@@ -1830,7 +1830,7 @@ AnimalsUI
 
 We wrote a lot of code, but you saw for yourself that a lot of what we built was really just standard SwiftUI. Learning `ImmutableData` does not mean throwing away the knowledge you already have. The biggest difference you would probably notice is that none of these components perform imperative mutations on data model objects to transform our global state — we’re programming with a very different mental-model. We think declaratively: our components dispatch actions to our `Store` when something happens. Our components do not tell our `Store` *how* to behave; our components tell our `Store` *what* just happened.
 
-[^1]: https://developer.apple.com/videos/play/wwdc2023/10160/
-[^2]: https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0
-[^3]: https://developer.apple.com/documentation/swiftui/state#Store-observable-objects
-[^4]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0111-remove-arg-label-type-significance.md
+[^1]: <https://developer.apple.com/videos/play/wwdc2023/10160/>
+[^2]: <https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0>
+[^3]: <https://developer.apple.com/documentation/swiftui/state#Store-observable-objects>
+[^4]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0111-remove-arg-label-type-significance.md>

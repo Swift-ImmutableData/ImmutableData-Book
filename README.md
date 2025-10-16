@@ -84,6 +84,14 @@ You can find more repos on our `ImmutableData` GitHub organization:
 * [`ImmutableData-Legacy`](https://github.com/Swift-ImmutableData/ImmutableData-Legacy) is a version of the `ImmutableData` infra that deploys to older operating systems.
 * [`ImmutableData-FoodTruck`](https://github.com/Swift-ImmutableData/ImmutableData-FoodTruck) is an incremental migration tutorial. We begin with an app from Apple built on a legacy architecture. We then show how the `ImmutableData` infra can be used to incrementally migrate individual components and product surfaces *without* changing the behavior of components and product surfaces built on the legacy infra. We show how `ImmutableData` can “coexist” with a legacy architecture.
 
+## Community Projects
+
+### <https://immutabledatabook.netlify.app/>
+
+Browse and navigate through the *The ImmutableData Programming Guide* in [`mdBook`](https://rust-lang.github.io/mdBook/).
+
+Thanks to [arthmis](https://github.com/arthmis) for contributing.
+
 ## License
 
 Copyright 2024 Rick van Voorden and Bill Fisher
@@ -94,7 +102,7 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 
-[^1]: https://developer.apple.com/videos/play/wwdc2019/226
-[^2]: https://www.cocoawithlove.com/blog/app-submodules.html
-[^3]: https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/
-[^4]: https://www.swift.org/documentation/tspl/
+[^1]: <https://developer.apple.com/videos/play/wwdc2019/226>
+[^2]: <https://www.cocoawithlove.com/blog/app-submodules.html>
+[^3]: <https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ProgrammingWithObjectiveC/>
+[^4]: <https://www.swift.org/documentation/tspl/>

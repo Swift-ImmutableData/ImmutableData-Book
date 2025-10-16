@@ -343,6 +343,6 @@ $ curl http://localhost:8080/animals/api -X POST -d '{"query": [ {"animals": {}}
 
 With a minimal amount of new code, we not only have an HTTP server running to deliver `Category` and `Animal` values, we also leverage our existing `LocalStore` for writing to a persistent database on our filesystem.
 
-[^1]: https://www.swift.org/documentation/server/
-[^2]: https://www.swift.org/getting-started/vapor-web-server/
-[^3]: https://github.com/apple/swift-async-algorithms
+[^1]: <https://www.swift.org/documentation/server/>
+[^2]: <https://www.swift.org/getting-started/vapor-web-server/>
+[^3]: <https://github.com/apple/swift-async-algorithms>

@@ -72,7 +72,7 @@ Unlike Relay, `ImmutableData` is not built with opinions about a remote server, 
 
 In time, the `ImmutableData` architecture can continue evolving. A “next-gen” `ImmutableData` would probably look similar to Relay: the infra would ship with opinions about how a remote server works and how the data is structured. From those opinions, infra could then be written to solve for the repetitive problems that product engineers want solutions for: subscribing to remote changes, optimized caching logic, managing optimistic updates, and more.
 
-[^1]: https://graphql.org/learn/subscriptions/
-[^2]: https://relay.dev/docs/guided-tour/updating-data/graphql-subscriptions/
-[^3]: https://relay.dev/docs/guided-tour/reusing-cached-data/
-[^4]: https://relay.dev/docs/tutorial/mutations-updates/#improving-the-ux-with-an-optimistic-updater
+[^1]: <https://graphql.org/learn/subscriptions/>
+[^2]: <https://relay.dev/docs/guided-tour/updating-data/graphql-subscriptions/>
+[^3]: <https://relay.dev/docs/guided-tour/reusing-cached-data/>
+[^4]: <https://relay.dev/docs/tutorial/mutations-updates/#improving-the-ux-with-an-optimistic-updater>

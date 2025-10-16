@@ -745,20 +745,20 @@ ImmutableUI
 
 Our infra is now in-place and we are ready to begin building sample application products. Some of the work we completed so far might seem a little abstract without seeing how product engineers put this to work in a production application. Building three sample application products together from this infra should help to demonstrate how to “think in `ImmutableData`” when it’s time to bring the `ImmutableData` architecture to your own products.
 
-[^1]: https://developer.apple.com/documentation/swiftui/environmentvalues/modelcontext
-[^2]: https://react-redux.js.org/api/provider
-[^3]: https://react-redux.js.org/api/hooks#usedispatch
-[^4]: https://react-redux.js.org/api/hooks#useselector
-[^5]: https://redux.js.org/usage/deriving-data-selectors#writing-memoized-selectors-with-reselect
-[^6]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0395-observability.md
-[^7]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0393-parameter-packs.md
-[^8]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0398-variadic-types.md
-[^9]: https://github.com/swiftlang/swift/issues/73690
-[^10]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0408-pack-iteration.md
-[^11]: https://swiftui-lab.com/swiftui-id/
-[^12]: https://developer.apple.com/videos/play/wwdc2020/10040
-[^13]: https://developer.apple.com/videos/play/wwdc2021/10022
-[^14]: https://davedelong.com/blog/2021/04/03/core-data-and-swiftui/
-[^15]: https://developer.apple.com/documentation/swiftui/dynamicproperty
-[^16]: https://github.com/swiftlang/swift-evolution/blob/main/proposals/0423-dynamic-actor-isolation.md
-[^17]: https://developer.apple.com/documentation/swiftui/state#Store-observable-objects
+[^1]: <https://developer.apple.com/documentation/swiftui/environmentvalues/modelcontext>
+[^2]: <https://react-redux.js.org/api/provider>
+[^3]: <https://react-redux.js.org/api/hooks#usedispatch>
+[^4]: <https://react-redux.js.org/api/hooks#useselector>
+[^5]: <https://redux.js.org/usage/deriving-data-selectors#writing-memoized-selectors-with-reselect>
+[^6]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0395-observability.md>
+[^7]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0393-parameter-packs.md>
+[^8]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0398-variadic-types.md>
+[^9]: <https://github.com/swiftlang/swift/issues/73690>
+[^10]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0408-pack-iteration.md>
+[^11]: <https://swiftui-lab.com/swiftui-id/>
+[^12]: <https://developer.apple.com/videos/play/wwdc2020/10040>
+[^13]: <https://developer.apple.com/videos/play/wwdc2021/10022>
+[^14]: <https://davedelong.com/blog/2021/04/03/core-data-and-swiftui/>
+[^15]: <https://developer.apple.com/documentation/swiftui/dynamicproperty>
+[^16]: <https://github.com/swiftlang/swift-evolution/blob/main/proposals/0423-dynamic-actor-isolation.md>
+[^17]: <https://developer.apple.com/documentation/swiftui/state#Store-observable-objects>

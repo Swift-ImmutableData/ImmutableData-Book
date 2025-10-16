@@ -263,7 +263,7 @@ Our original and primary goal when choosing `ImmutableData` instead of SwiftData
 
 If `ImmutableData` gave us value semantics and a declarative programming model, the argument could be made we would prefer `ImmutableData` *even if* SwiftData offered better performance. If `ImmutableData` gives us values semantics, a declarative programming model, *and* better performance than SwiftData, we can strongly recommend this architecture for your own products and teams.
 
-[^1]: https://github.com/apple/swift-collections-benchmark
-[^2]: https://github.com/ordo-one/package-benchmark
-[^3]: https://github.com/apple/swift-collections
-[^4]: https://jaredkhan.com/blog/swift-copy-on-write#many-structs
+[^1]: <https://github.com/apple/swift-collections-benchmark>
+[^2]: <https://github.com/ordo-one/package-benchmark>
+[^3]: <https://github.com/apple/swift-collections>
+[^4]: <https://jaredkhan.com/blog/swift-copy-on-write#many-structs>

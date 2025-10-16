@@ -41,4 +41,4 @@ Our `main` function builds a `LocalStore` instance. We can then read from our `L
 
 Try it for yourself: think of this executable as a “playground”. Try adding mutations. Run your executable again and confirm the mutations were persisted.
 
-[^1]: https://forums.developer.apple.com/forums/thread/734540
+[^1]: <https://forums.developer.apple.com/forums/thread/734540>

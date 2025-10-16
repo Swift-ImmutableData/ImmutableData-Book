@@ -417,9 +417,9 @@ CounterUI
 
 Unlike our previous chapters, we don’t have a very strong opinion on unit testing your view component tree built from `ImmutableData`. We consider unit testing SwiftUI to be orthogonal to our goal of teaching the `ImmutableData` architecture. For this tutorial, we prefer “integration-style” testing using `Preview`. If you are interested in learning more about unit testing for SwiftUI, we recommend following Jon Reid and Quality Coding to learn what might be possible for your products.[^6]
 
-[^1]: https://developer.apple.com/documentation/swiftui/environmentkey/
-[^2]: https://github.com/apple/swift-evolution/blob/main/proposals/0423-dynamic-actor-isolation.md
-[^3]: https://developer.apple.com/forums/thread/770298
-[^4]: https://react.dev/learn/reusing-logic-with-custom-hooks
-[^5]: https://developer.apple.com/forums/thread/763442
-[^6]: https://qualitycoding.org
+[^1]: <https://developer.apple.com/documentation/swiftui/environmentkey/>
+[^2]: <https://github.com/apple/swift-evolution/blob/main/proposals/0423-dynamic-actor-isolation.md>
+[^3]: <https://developer.apple.com/forums/thread/770298>
+[^4]: <https://react.dev/learn/reusing-logic-with-custom-hooks>
+[^5]: <https://developer.apple.com/forums/thread/763442>
+[^6]: <https://qualitycoding.org>
